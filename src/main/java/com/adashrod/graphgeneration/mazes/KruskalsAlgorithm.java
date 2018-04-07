@@ -9,7 +9,9 @@ import java.util.List;
 import static com.adashrod.graphgeneration.mazes.Direction.determineDirection;
 
 /**
- * Created by aaron on 2018-04-04.
+ * An implementation of https://en.wikipedia.org/wiki/Kruskal%27s_algorithm for generating random 2D mazes with square
+ * spaces
+ * @author adashrod@gmail.com
  */
 public class KruskalsAlgorithm extends MazeGenerator {
     private Tree[][] parallelMatrix;
@@ -45,6 +47,9 @@ public class KruskalsAlgorithm extends MazeGenerator {
         }
     }
 
+    /**
+     * Simple unidirectional tree for implementing a disjoint set
+     */
     static class Tree {
         Tree parent = this;
 
@@ -61,6 +66,9 @@ public class KruskalsAlgorithm extends MazeGenerator {
         }
     }
 
+    /**
+     * An edge is determined by the coordinates of the two spaces that it separates
+     */
     static class Edge {
         final OrderedPair<Integer> a;
         final OrderedPair<Integer> b;

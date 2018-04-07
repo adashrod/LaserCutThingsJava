@@ -8,8 +8,9 @@ import java.util.List;
 import static com.adashrod.graphgeneration.mazes.Direction.determineDirection;
 
 /**
- *
- * Created by arodriguez on 2018-04-04.
+ * An implementation of https://en.wikipedia.org/wiki/Prim%27s_algorithm for generating random 2D mazes with square
+ * spaces
+ * @author adashrod@gmail.com
  */
 public class PrimsAlgorithm extends MazeGenerator {
     private Maze maze;
@@ -20,9 +21,9 @@ public class PrimsAlgorithm extends MazeGenerator {
         this.maze = maze;
         markOnPathAndAddUnexploredNeighborsToNext(rng.nextInt(maze.getNumCols()), rng.nextInt(maze.getNumRows()));
         while (!nextSpaces.isEmpty()) {
-            final OrderedPair <Integer>removed = nextSpaces.remove(rng.nextInt(nextSpaces.size()));
+            final OrderedPair<Integer> removed = nextSpaces.remove(rng.nextInt(nextSpaces.size()));
             final List<OrderedPair<Integer>> neighbors = findOnPathNeighbors(removed.x, removed.y);
-            final OrderedPair <Integer>randNeighbor = neighbors.get(rng.nextInt(neighbors.size()));
+            final OrderedPair<Integer> randNeighbor = neighbors.get(rng.nextInt(neighbors.size()));
 
             final Direction direction = determineDirection(removed, randNeighbor);
             maze.getGrid()[removed.y][removed.x].openWall(direction);

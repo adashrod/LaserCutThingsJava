@@ -8,7 +8,8 @@ import static com.adashrod.graphgeneration.mazes.Direction.SOUTH;
 import static com.adashrod.graphgeneration.mazes.Direction.WEST;
 
 /**
- * Created by arodriguez on 2018-04-05.
+ * An instance of MazeModelGenerator can be used to create a {@link MazeWallModel} from a {@link Maze}
+ * @author adashrod@gmail.com
  */
 public class MazeModelGenerator {
     private final Maze maze;
@@ -19,12 +20,27 @@ public class MazeModelGenerator {
         this.maze = maze;
     }
 
+    /**
+     * @see MazeModelGenerator#isFavorEwWalls()
+     * @param favorEwWalls true for east-west, false for north-south
+     * @return this
+     */
     public MazeModelGenerator setFavorEw(final boolean favorEwWalls) {
         this.favorEwWalls = favorEwWalls;
         return this;
     }
 
-    public MazeWallModel generateFrom() {
+    /**
+     * if favorEwWalls is true, the generator will build east-west (horizontal) walls first, and north-south (vertical)
+     * walls second; if false, vice-versa. The important difference is which wall will permeate through a plus-shaped
+     * intersection of two long walls. The second wall built will be split at the intersection into 2 parts.
+     * @return true for east-west, false for north-south
+     */
+    public boolean isFavorEwWalls() {
+        return favorEwWalls;
+    }
+
+    public MazeWallModel generate() {
         return createWalls();
     }
 

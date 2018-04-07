@@ -3,6 +3,7 @@ package com.adashrod.graphgeneration.mazes;
 /**
  * This maze class is a representation of a maze based on a grid of squares. Each square knows about the four walls
  * surrounding it.
+ * @author adashrod@gmail.com
  */
 public class Maze {
     private final int numCols;
@@ -24,19 +25,35 @@ public class Maze {
         }
     }
 
+    /**
+     * check if a space determined by the coordinates is inside the maze boundary
+     * @param x
+     * @param y
+     * @return
+     */
     public boolean isInBounds(final int x, final int y) {
         return x >= 0 && x < numCols && y >= 0 && y < numRows;
     }
 
+    /**
+     * Randomizes this maze using the supplied algorithm
+     * @param generatorAlgorithm which algorithm to use
+     */
     public void build(final MazeGenerator generatorAlgorithm) {
         initGrid();
         generatorAlgorithm.buildPaths(this);
     }
 
+    /**
+     * @return number of columns/width of the maze
+     */
     public int getNumCols() {
         return numCols;
     }
 
+    /**
+     * @return number of rows/height of the maze
+     */
     public int getNumRows() {
         return numRows;
     }

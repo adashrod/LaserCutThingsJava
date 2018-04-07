@@ -9,7 +9,7 @@ import java.util.Collection;
  * This maze class is a representation of a maze based on a list of walls. Each wall has a start point and end point.
  * The walls should not intersect, except possibly at the ends with T- and L-shaped intersections. A 4-way intersection
  * should always consist of three walls.
- * Created by arodriguez on 2018-04-05.
+ * @author adashrod@gmail.com
  */
 public class MazeWallModel {
     final Collection<Wall> walls = new ArrayList<>();
@@ -18,11 +18,12 @@ public class MazeWallModel {
         walls.add(wall);
     }
 
+    /**
+     * A wall within a MazeWallModel. The model is a 2D top-down representation of a maze. Walls have no depth
+     */
     public static class Wall {
         OrderedPair<Double> start;
         OrderedPair<Double> end;
-
-        public Wall() {}
 
         public Wall(final OrderedPair<Double> start, final OrderedPair<Double> end) {
             this.start = start;

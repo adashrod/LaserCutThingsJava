@@ -9,22 +9,33 @@ import java.io.PrintStream;
 import java.util.Objects;
 
 /**
- * Created by aaron on 2018-04-05.
+ * Utility for printing {@link Maze}s and {@link MazeWallModel}s in various forms
+ * @author adashrod@gmail.com
  */
 public class MazePrinter {
     private final Maze maze;
     private final MazeWallModel mazeWallModel;
 
+    /**
+     * @param maze the maze to print with this MazePrinter instance
+     */
     public MazePrinter(final Maze maze) {
         this.maze = maze;
         this.mazeWallModel = null;
     }
 
+    /**
+     * @param mazeWallModel the maze to print with this MazePrinter instance
+     */
     public MazePrinter(final MazeWallModel mazeWallModel) {
         this.maze = null;
         this.mazeWallModel = mazeWallModel;
     }
 
+    /**
+     * for debugging, prints the detail of the {@link Space}s in the {@link this#maze}
+     * @param printStream where to print to
+     */
     void printSpaceDetail(final PrintStream printStream) {
         if (maze == null) {
             throw new IllegalStateException("maze can't be null");
@@ -39,10 +50,19 @@ public class MazePrinter {
         }
     }
 
+    /**
+     * for debugging, prints the detail of the {@link Space}s in the maze to System.out
+     */
     void printSpaceDetail() {
         printSpaceDetail(System.out);
     }
 
+    /**
+     * Prints the {@link this#maze} to printStream using '_', '|', and ' '
+     * Each row in the maze will be represented in one line of output. The rows will have 2 chars printed for each space:
+     * 1 will be a ' ' if there is no south wall or '_' if there is; 1 will be '|' if there is an east wall
+     * @param printStream where to print to
+     */
     public void printAsciiArt(final PrintStream printStream) {
         if (maze == null) {
             throw new IllegalStateException("maze can't be null");
@@ -82,10 +102,17 @@ public class MazePrinter {
         }
     }
 
+    /**
+     * @see MazePrinter#printAsciiArt(PrintStream). Prints to System.out
+     */
     public void printAsciiArt() {
         printAsciiArt(System.out);
     }
 
+    /**
+     * Mostly for debugging, creates an SVG file with rectangles representing the walls of the {@link this#mazeWallModel}
+     * @param name filename to create
+     */
     public void printTestSvg(final String name) {
         if (mazeWallModel == null) {
             throw new IllegalStateException("maze can't be null");

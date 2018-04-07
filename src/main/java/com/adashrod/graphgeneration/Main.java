@@ -47,17 +47,17 @@ public class Main {
         maze.build(new PrimsAlgorithm());
         System.out.println("prim's:");
         new MazePrinter(maze).printAsciiArt();
-        mazeWallModel = new MazeModelGenerator(maze).generateFrom();
+        mazeWallModel = new MazeModelGenerator(maze).generate();
         new MazePrinter(mazeWallModel).printTestSvg("primsNs.svg");
-        mazeWallModel = new MazeModelGenerator(maze).setFavorEw(true).generateFrom();
+        mazeWallModel = new MazeModelGenerator(maze).setFavorEw(true).generate();
         new MazePrinter(mazeWallModel).printTestSvg("primsEw.svg");
 
         maze.build(new KruskalsAlgorithm());
         System.out.println("kruskal's");
         new MazePrinter(maze).printAsciiArt();
-        mazeWallModel = new MazeModelGenerator(maze).setFavorEw(false).generateFrom();
+        mazeWallModel = new MazeModelGenerator(maze).setFavorEw(false).generate();
         new MazePrinter(mazeWallModel).printTestSvg("kruskalsNs.svg");
-        mazeWallModel = new MazeModelGenerator(maze).setFavorEw(true).generateFrom();
+        mazeWallModel = new MazeModelGenerator(maze).setFavorEw(true).generate();
         new MazePrinter(mazeWallModel).printTestSvg("kruskalsEw.svg");
     }
 }

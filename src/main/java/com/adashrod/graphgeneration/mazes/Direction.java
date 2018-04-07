@@ -6,7 +6,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 /**
- * Created by arodriguez on 2018-04-04.
+ * four directions for relating {@link Space}s to each other
  */
 public enum Direction {
     NORTH,
@@ -27,6 +27,12 @@ public enum Direction {
         return OPPOSITES.get(this);
     }
 
+    /**
+     * Determines the direction that relates "from" to "to", e.g. if "to" is to the EAST of "from", EAST is returned
+     * @param from
+     * @param to
+     * @return
+     */
     public static Direction determineDirection(final OrderedPair<?> from, final OrderedPair<?> to) {
         final int xComp = Double.compare(from.x.doubleValue(), to.x.doubleValue());
         if (xComp < 0) { return Direction.EAST; }
@@ -34,6 +40,7 @@ public enum Direction {
         final int yComp = Double.compare(from.y.doubleValue(), to.y.doubleValue());
         if (yComp < 0) { return Direction.SOUTH; }
         if (yComp > 0) { return Direction.NORTH; }
-        throw new IllegalArgumentException("dude wtf");
+        throw new IllegalArgumentException(String.format("Indeterminate: the 2 OrderedPairs couldn't be compared: %s, %s",
+            from, to));
     }
 }

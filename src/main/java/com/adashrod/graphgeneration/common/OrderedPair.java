@@ -1,7 +1,8 @@
 package com.adashrod.graphgeneration.common;
 
 /**
- * Created by arodriguez on 2018-04-04.
+ * A container for two numeric coordinates
+ * @author adashrod@gmail.com
  */
 public class OrderedPair<T extends Number> {
     public T x, y;
