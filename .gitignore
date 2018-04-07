@@ -1,0 +1,12 @@
+# build artifacts
+/ivy
+/build
+/lib
+/out
+/target
+
+# IntelliJ artifacts
+/.idea
+*.iml
+
+/todo.txt

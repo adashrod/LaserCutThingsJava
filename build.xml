@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="GraphGeneration" basedir="." default="build"
+         xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <property name="ivy.version"               value="2.4.0"/>
+    <property name="ivy.dir"                   value="${basedir}/ivy"/>
+    <property name="ivy.jar-filename"          value="${ivy.dir}/ivy.jar"/>
+    <property name="main-java.dir"             value="src/main/java"/>
+    <property name="test-java.dir"             value="src/test/java"/>
+    <property name="main-resources.dir"        value="src/main/resources"/>
+    <property name="lib.dir"                   value="lib"/>
+    <property name="build.dir"                 value="build"/>
+    <property name="target.dir"                value="target"/>
+    <property name="jar.filename"              value="GraphGeneration.jar"/>
+
+    <path id="classpath.main">
+        <fileset dir="${lib.dir}/runtime">
+            <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${lib.dir}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <available file="${ivy.jar-filename}" property="ivy.installed"/>
+
+    <target name="ivy.download" unless="ivy.installed" description="downloads the ivy jar file">
+        <echo message="downloading ivy..."/>
+        <mkdir dir="${ivy.dir}"/>
+        <get src="http://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.version}/ivy-${ivy.version}.jar" dest="${ivy.jar-filename}" usetimestamp="true"/>
+    </target>
+
+    <target name="ivy.install" depends="ivy.download" description="registers the ivy antlib in ant">
+        <echo message="registering ivy antlib..."/>
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.dir}" includes="*.jar"/>
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+    </target>
+
+    <target name="ivy-resolve.main" depends="ivy.install" description="resolve ivy dependencies for running the server">
+        <ivy:retrieve pattern="${lib.dir}/[conf]/[type]/[organisation]-[artifact]-[revision].[ext]"/>
+    </target>
+
+    <target name="compile" depends="ivy-resolve.main" description="compile source">
+        <mkdir dir="${build.dir}"/>
+        <javac destdir="${build.dir}" includeantruntime="false" classpathref="classpath.main">
+            <src path="${main-java.dir}"/>
+        </javac>
+    </target>
+
+    <target name="copy-resources" description="copy resources to build dir">
+        <copy todir="${build.dir}">
+            <fileset dir="${main-resources.dir}"/>
+        </copy>
+    </target>
+
+    <target name="copy-libs" description="copy lib files to target dir">
+        <copy todir="${target.dir}" failonerror="false">
+            <fileset dir="${lib.dir}">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${lib.dir}/runtime/jar">
+                <include name="*.jar"/>
+            </fileset>
+            <fileset dir="${lib.dir}/runtime/bundle">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="jar" depends="compile, copy-resources" description="creates a jar file in the target directory">
+        <pathconvert refid="classpath.main" property="manifest.classpath" pathsep=" ">
+            <!--  before mapping, they will all be absolute paths -->
+            <map from="${basedir}/lib/runtime/bundle/" to=""/>
+            <map from="${basedir}/lib/runtime/jar/" to=""/>
+            <map from="${basedir}/lib/" to=""/>
+        </pathconvert>
+
+        <mkdir dir="${target.dir}"/>
+        <jar destfile="${target.dir}/${jar.filename}" basedir="${build.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="com.adashrod.graphgeneration.Main"/>
+                <attribute name="Class-Path" value="${manifest.classpath}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="build" depends="jar, copy-libs" description="creates the jar and copies it and all dependencies to the target dir. The jar should be runnable from within that directory afterward."/>
+
+    <target name="clean" description="cleans all build artifacts">
+        <delete includeemptydirs="true" quiet="true">
+            <fileset dir="${lib.dir}"/>
+            <fileset dir="${build.dir}"/>
+            <fileset dir="${target.dir}"/>
+        </delete>
+    </target>
+
+    <target name="clean.ant-deps" description="clean the ivy installation">
+        <delete dir="${ivy.dir}"/>
+    </target>
+
+    <target name="ivy.clean-cache" depends="ivy.install" description="clean the ivy cache">
+        <ivy:cleancache/>
+    </target>
+</project>
