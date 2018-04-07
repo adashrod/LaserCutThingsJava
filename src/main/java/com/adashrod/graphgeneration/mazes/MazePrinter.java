@@ -115,7 +115,7 @@ public class MazePrinter {
      */
     public void printTestSvg(final String name) {
         if (mazeWallModel == null) {
-            throw new IllegalStateException("maze can't be null");
+            throw new IllegalStateException("mazeWallModel can't be null");
         }
         try (final FileWriter fileWriter = new FileWriter(name)) {
             final InputStream headerStream = getClass().getResourceAsStream("/header.svg");
