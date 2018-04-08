@@ -1,4 +1,6 @@
-package com.adashrod.graphgeneration.mazes;
+package com.adashrod.graphgeneration.mazes.models;
+
+import com.adashrod.graphgeneration.mazes.Direction;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,7 +17,7 @@ import static com.adashrod.graphgeneration.mazes.Direction.WEST;
  * @author adashrod@gmail.com
  */
 public class TopDownRectangularWallModel {
-    final Space[][] grid;
+    public final Space[][] grid;
     double wallWidth, hallWidth;
 
     public TopDownRectangularWallModel(final int width, final int height) {
@@ -28,8 +30,8 @@ public class TopDownRectangularWallModel {
     }
 
     public static class Space {
-        boolean isWall;
-        final Collection<Direction> endDirections = new HashSet<>(); // todo: get rid of direct access
+        public boolean isWall;
+        public final Collection<Direction> endDirections = new HashSet<>(); // todo: get rid of direct access
 
         @Override
         public String toString() {

@@ -1,5 +1,9 @@
 package com.adashrod.graphgeneration.mazes;
 
+import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
+import com.adashrod.graphgeneration.mazes.models.Maze;
+import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
+
 import java.io.BufferedReader;
 import java.io.FileWriter;
 import java.io.IOException;

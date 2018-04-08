@@ -1,6 +1,10 @@
-package com.adashrod.graphgeneration.mazes;
+package com.adashrod.graphgeneration.mazes.factories;
 
 import com.adashrod.graphgeneration.common.OrderedPair;
+import com.adashrod.graphgeneration.mazes.Direction;
+import com.adashrod.graphgeneration.mazes.models.Maze;
+import com.adashrod.graphgeneration.mazes.Space;
+import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
 
 import static com.adashrod.graphgeneration.mazes.Direction.EAST;
 import static com.adashrod.graphgeneration.mazes.Direction.NORTH;

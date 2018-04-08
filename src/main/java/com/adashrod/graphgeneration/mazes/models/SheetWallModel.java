@@ -1,4 +1,4 @@
-package com.adashrod.graphgeneration.mazes;
+package com.adashrod.graphgeneration.mazes.models;
 
 import com.adashrod.graphgeneration.common.OrderedPair;
 

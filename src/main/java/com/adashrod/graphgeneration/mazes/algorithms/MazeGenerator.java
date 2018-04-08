@@ -1,4 +1,6 @@
-package com.adashrod.graphgeneration.mazes;
+package com.adashrod.graphgeneration.mazes.algorithms;
+
+import com.adashrod.graphgeneration.mazes.models.Maze;
 
 import java.util.Random;
 

@@ -1,4 +1,7 @@
-package com.adashrod.graphgeneration.mazes;
+package com.adashrod.graphgeneration.mazes.factories;
+
+import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
+import com.adashrod.graphgeneration.mazes.models.TopDownRectangularWallModel;
 
 /**
  * Created by adashrod@gmail.com on 2018-04-07.

@@ -1,4 +1,7 @@
-package com.adashrod.graphgeneration.mazes;
+package com.adashrod.graphgeneration.mazes.models;
+
+import com.adashrod.graphgeneration.mazes.Space;
+import com.adashrod.graphgeneration.mazes.algorithms.MazeGenerator;
 
 /**
  * This maze class is a representation of a maze based on a grid of squares. Each square knows about the four walls

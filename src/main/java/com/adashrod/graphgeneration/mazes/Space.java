@@ -9,10 +9,10 @@ public class Space {
     boolean eastOpen;
     boolean southOpen;
     boolean westOpen;
-    boolean exploringNext;
-    boolean onPath;
+    public boolean exploringNext;
+    public boolean onPath;
 
-    boolean isUnexplored() {
+    public boolean isUnexplored() {
         return !northOpen && !eastOpen && !southOpen && !westOpen && !exploringNext && !onPath;
     }
 

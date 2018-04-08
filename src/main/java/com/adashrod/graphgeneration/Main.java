@@ -1,14 +1,14 @@
 package com.adashrod.graphgeneration;
 
 import com.adashrod.graphgeneration.cuttingboardgrids.CuttingBoard;
-import com.adashrod.graphgeneration.mazes.KruskalsAlgorithm;
-import com.adashrod.graphgeneration.mazes.LinearWallModel;
-import com.adashrod.graphgeneration.mazes.LinearWallModelGenerator;
-import com.adashrod.graphgeneration.mazes.Maze;
+import com.adashrod.graphgeneration.mazes.algorithms.KruskalsAlgorithm;
+import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
+import com.adashrod.graphgeneration.mazes.factories.LinearWallModelGenerator;
+import com.adashrod.graphgeneration.mazes.models.Maze;
 import com.adashrod.graphgeneration.mazes.MazePrinter;
-import com.adashrod.graphgeneration.mazes.PrimsAlgorithm;
-import com.adashrod.graphgeneration.mazes.TopDownRectangularWallModel;
-import com.adashrod.graphgeneration.mazes.TopDownRectangularWallModelGenerator;
+import com.adashrod.graphgeneration.mazes.algorithms.PrimsAlgorithm;
+import com.adashrod.graphgeneration.mazes.models.TopDownRectangularWallModel;
+import com.adashrod.graphgeneration.mazes.factories.TopDownRectangularWallModelGenerator;
 
 import java.io.IOException;
 import java.math.BigDecimal;

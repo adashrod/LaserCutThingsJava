@@ -1,4 +1,8 @@
-package com.adashrod.graphgeneration.mazes;
+package com.adashrod.graphgeneration.mazes.factories;
+
+import com.adashrod.graphgeneration.mazes.Direction;
+import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
+import com.adashrod.graphgeneration.mazes.models.TopDownRectangularWallModel;
 
 import java.util.ArrayList;
 import java.util.Collection;

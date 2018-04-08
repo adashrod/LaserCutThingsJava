@@ -1,6 +1,7 @@
-package com.adashrod.graphgeneration.mazes;
+package com.adashrod.graphgeneration.mazes.models;
 
 import com.adashrod.graphgeneration.common.OrderedPair;
+import com.adashrod.graphgeneration.mazes.Direction;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,9 +17,9 @@ import static com.adashrod.graphgeneration.mazes.Direction.WEST;
  * @author adashrod@gmail.com
  */
 public class LinearWallModel {
-    final int width, height;
-    final Collection<Wall> walls = new ArrayList<>();
-    final boolean favorEwWalls;
+    public final int width, height;
+    public final Collection<Wall> walls = new ArrayList<>();
+    public final boolean favorEwWalls;
 
     public LinearWallModel(final int width, final int height, final boolean favorEwWalls) {
         this.width = width;
@@ -34,8 +35,8 @@ public class LinearWallModel {
      * A wall within a LinearWallModel. The model is a 2D top-down representation of a maze. Walls have no depth
      */
     public static class Wall {
-        OrderedPair<Integer> start;
-        OrderedPair<Integer> end;
+        public OrderedPair<Integer> start;
+        public OrderedPair<Integer> end;
 
         public Wall(final OrderedPair<Integer> start, final OrderedPair<Integer> end) {
             final Direction direction = Direction.determineDirection(start, end);
