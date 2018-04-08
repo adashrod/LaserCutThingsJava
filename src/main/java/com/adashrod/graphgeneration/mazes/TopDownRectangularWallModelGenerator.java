@@ -25,7 +25,7 @@ public class TopDownRectangularWallModelGenerator {
         final TopDownRectangularWallModel topDownRectangularWallModel = new TopDownRectangularWallModel(2 * model.width + 1, 2 * model.height + 1);
 
         final Collection<LinearWallModel.Wall> verticalWalls = new ArrayList<>(), horizontalWalls = new ArrayList<>();
-        model.walls.forEach(((final LinearWallModel.Wall wall) -> {
+        model.walls.forEach((final LinearWallModel.Wall wall) -> {
             final Direction wallDirection = determineDirection(wall.start, wall.end);
             if (wallDirection == NORTH || wallDirection == WEST) {
                 throw new IllegalStateException("wall direction should only be EAST or SOUTH (start-to-end should be left-to-right or top-to-bottom): " +
@@ -37,7 +37,7 @@ public class TopDownRectangularWallModelGenerator {
             } else {
                 horizontalWalls.add(wall);
             }
-        }));
+        });
         if (model.favorEwWalls) {
             createWallSpacesFromLinearWalls(topDownRectangularWallModel, horizontalWalls, false, true);
             createWallSpacesFromLinearWalls(topDownRectangularWallModel, verticalWalls, true, false);

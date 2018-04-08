@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+        "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+    <property name="fileExtensions" value="java, properties, xml"/>
+
+    <module name="FileTabCharacter"/>
+    <module name="NewlineAtEndOfFile">
+        <property name="lineSeparator" value="lf_cr_crlf"/>
+    </module>
+    <module name="UniqueProperties">
+        <property name="fileExtensions" value="properties"/>
+    </module>
+
+    <module name="TreeWalker">
+        <property name="tabWidth" value="4"/>
+
+        <module name="AnnotationUseStyle">
+            <property name="elementStyle" value="compact"/>
+            <property name="trailingArrayComma" value="never"/>
+            <property name="closingParens" value="ignore"/>
+        </module>
+        <module name="ArrayTypeStyle"/>
+        <module name="AvoidNestedBlocks"/>
+        <module name="AvoidStarImport"/>
+
+        <module name="LocalFinalVariableName"/>
+        <module name="LocalVariableName"/>
+        <module name="MemberName"/>
+        <module name="MethodName"/>
+        <module name="ParameterName"/>
+        <module name="ConstantName">
+            <property name="applyToPrivate" value="false"/>
+            <property name="applyToPackage" value="false"/>
+            <property name="applyToProtected" value="false"/>
+        </module>
+        <module name="TypeName"/>
+
+        <module name="CovariantEquals"/>
+        <module name="CyclomaticComplexity">
+            <property name="max" value="15"/>
+        </module>
+        <module name="EmptyBlock"/>
+        <module name="EmptyCatchBlock">
+            <property name="exceptionVariableName" value="ignored"/>
+        </module>
+        <module name="EmptyStatement"/>
+        <module name="EqualsHashCode"/>
+        <module name="ExplicitInitialization"/>
+        <module name="FallThrough"/>
+        <module name="FinalClass"/>
+        <module name="FinalLocalVariable"/>
+        <module name="FinalParameters">
+            <property name="tokens" value="METHOD_DEF,CTOR_DEF,LITERAL_CATCH"/>
+        </module>
+        <module name="GenericWhitespace"/>
+        <module name="HideUtilityClassConstructor"/>
+        <module name="IllegalImport"/>
+        <module name="IllegalThrows"/>
+        <module name="IllegalToken">
+            <property name="tokens" value="UNARY_PLUS"/>
+        </module>
+        <module name="IllegalType"/>
+        <!-- disabled because it enforces weird indentation for lambdas -->
+        <!--<module name="Indentation">-->
+            <!--<property name="throwsIndent" value="8"/>-->
+        <!--</module>-->
+        <module name="MagicNumber">
+            <property name="ignoreNumbers" value="-1,0,1,2,3,4,5,6,7,8,9,10,1024"/>
+            <property name="ignoreHashCodeMethod" value="true"/>
+            <property name="ignoreFieldDeclaration" value="true"/>
+            <property name="ignoreAnnotation" value="true"/>
+        </module>
+        <module name="MissingDeprecated"/>
+        <module name="ModifierOrder"/>
+        <module name="MutableException"/>
+        <module name="NeedBraces"/>
+        <module name="NoFinalizer"/>
+        <module name="RedundantImport"/>
+        <module name="RedundantModifier"/>
+        <module name="StringLiteralEquality"/>
+        <module name="UnnecessaryParentheses"/>
+        <module name="UnusedImports"/>
+        <module name="UpperEll"/>
+    </module>
+</module>

@@ -8,5 +8,6 @@
     </configurations>
     <dependencies defaultconf="runtime->default">
         <dependency org="log4j"                             name="log4j"                        rev="1.2.14"/>
+        <dependency org="com.puppycrawl.tools"              name="checkstyle"                   rev="6.8.2"         conf="test->default"/>
     </dependencies>
 </ivy-module>

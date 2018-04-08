@@ -330,7 +330,7 @@ public class CuttingBoard {
         BigDecimal cmStartX;
         BigDecimal cmStartY;
         BigDecimal scaleFactor = ONE;
-        boolean printAllCmHashes = false;
+        boolean printAllCmHashes;
 
         public CuttingBoardConfig withNumInchRows(final int numInchRows) {
             this.numInchRows = numInchRows;

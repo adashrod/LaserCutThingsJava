@@ -80,15 +80,7 @@ public class MazePrinter {
             throw new IllegalStateException("maze can't be null");
         }
         final PrintStream o = printStream != null ? printStream : System.out;
-        o.print("_");
-        for (int x = 0; x < maze.getNumCols(); x++) {
-            final Space space = maze.getGrid()[0][x];
-            o.print(space.northOpen ? " " : "_");
-            final Space next = x + 1 < maze.getNumCols() ? maze.getGrid()[0][x + 1] : null;
-            final boolean nextNorthOpen = next == null || next.northOpen;
-            o.print(space.northOpen && nextNorthOpen ? " " : "_");
-        }
-        o.println();
+        printAsciiArtHelperFirstRow(o);
         for (int y = 0; y < maze.getNumRows(); y++) {
             // pre-phase: print left wall or opening at start of row
             o.print(maze.getGrid()[y][0].westOpen ? " " : "|");
@@ -112,6 +104,18 @@ public class MazePrinter {
             }
             o.println();
         }
+    }
+
+    private void printAsciiArtHelperFirstRow(final PrintStream o) {
+        o.print("_");
+        for (int x = 0; x < maze.getNumCols(); x++) {
+            final Space space = maze.getGrid()[0][x];
+            o.print(space.northOpen ? " " : "_");
+            final Space next = x + 1 < maze.getNumCols() ? maze.getGrid()[0][x + 1] : null;
+            final boolean nextNorthOpen = next == null || next.northOpen;
+            o.print(space.northOpen && nextNorthOpen ? " " : "_");
+        }
+        o.println();
     }
 
     /**
@@ -141,15 +145,16 @@ public class MazePrinter {
                 .append("inkscape:groupmode=\"layer\" ")
                 .append("id=\"layer1\">");
 
+            final int rectWidth = 4, rectScale = 20;
             for (final LinearWallModel.Wall wall: linearWallModel.walls) {
                 final boolean vertical = Objects.equals(wall.start.x, wall.end.x);
-                final double addX = vertical ? 4 : 0;
-                final double addY = vertical ? 0 : 4;
+                final double addX = vertical ? rectWidth : 0;
+                final double addY = vertical ? 0 : rectWidth;
                 fileWriter.append("<rect style=\"stroke:#000000;fill:none\" ")
-                    .append("x=\"").append(Double.toString(wall.start.x * 20 - addX)).append("\" ")
-                    .append("y=\"").append(Double.toString(wall.start.y * 20 - addY)).append("\" ")
-                    .append("width=\"").append(vertical ? "4" : Double.toString(Math.abs(wall.end.x - wall.start.x) * 20 - 4)).append("\" ")
-                    .append("height=\"").append(vertical ? Double.toString(Math.abs(wall.end.y - wall.start.y) * 20 - 4) : "4").append("\" ")
+                    .append("x=\"").append(Double.toString(wall.start.x * rectScale - addX)).append("\" ")
+                    .append("y=\"").append(Double.toString(wall.start.y * rectScale - addY)).append("\" ")
+                    .append("width=\"").append(vertical ? "4" : Double.toString(Math.abs(wall.end.x - wall.start.x) * rectScale - rectWidth)).append("\" ")
+                    .append("height=\"").append(vertical ? Double.toString(Math.abs(wall.end.y - wall.start.y) * rectScale - rectWidth) : Integer.toString(rectWidth)).append("\" ")
                     .append("/>");
             }
 

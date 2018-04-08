@@ -52,4 +52,16 @@ public class Path {
             Objects.equals(yEnd, aPath.yEnd);
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Objects.hashCode(xStart);
+        result = prime * result + Objects.hashCode(xEnd);
+        result = prime * result + Objects.hashCode(yStart);
+        result = prime * result + Objects.hashCode(yEnd);
+
+        return result;
+    }
+
 }

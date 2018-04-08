@@ -112,21 +112,21 @@ public class LinearWallModelGenerator {
                 int length, additive = 0;
                 for (length = 1; maze.isInBounds(xMajor ? x : x + length, xMajor ? y + length : y); length++) {
                     // wall continuation check
-                    final Space nextSpace = maze.getGrid()[xMajor ? y + length : y][xMajor ? x : x + length];
+                    final Space nextSpace = findNextSpace(xMajor, x, y, length);
                     if (nextSpace.isOpen(continuationCheckDirection)) {
                         break;
                     }
                     // wall overlap check
                     if (overlapCheckDirection != null) {
-                        final int sameLaneX = xMajor ? x     : x + length - 1, sameLaneY = xMajor ? y + length - 1 : y;
-                        final int prevLaneX = xMajor ? x - 1 : x + length - 1, prevLaneY = xMajor ? y + length - 1 : y - 1;
+                        final int sameLaneX = findSameLaneX(xMajor, x, length), sameLaneY = findSameLaneY(xMajor, y, length);
+                        final int prevLaneX = findPrevLaneX(xMajor, x, length), prevLaneY = findPrevLaneY(xMajor, y, length);
                         final Space spaceInSameLane = maze.getGrid()[sameLaneY][sameLaneX];
-                        final Space spaceInPreviousLane = maze.isInBounds(prevLaneX, prevLaneY) ? maze.getGrid()[prevLaneY][prevLaneX] : null;
+                        final Space spaceInPrevLane = findSpaceInPrevLane(prevLaneX, prevLaneY);
                         // 1st condition: check for perpendicular wall in same lane; 2nd: check for perpendicular wall
                         // in prev lane, but not for final row because we don't care about prev lane when doing the outer
                         // check
                         if (!spaceInSameLane.isOpen(overlapCheckDirection) ||
-                                (!isFinalWall && spaceInPreviousLane != null && !spaceInPreviousLane.isOpen(overlapCheckDirection))) {
+                                (!isFinalWall && spaceInPrevLane != null && !spaceInPrevLane.isOpen(overlapCheckDirection))) {
                             // i += length puts i just past the wall that's blocked by a perpendicular one; -1 is needed
                             // so that the next loop iter still checks that space after i++ happens
                             additive = -1;
@@ -134,32 +134,60 @@ public class LinearWallModelGenerator {
                         }
                     }
                 }
-                final int startX, startY, endX, endY;
-                if (xMajor) {
-                    startY = y;
-                    endY = y + length;
-                    if (isFinalWall) {
-                        startX = x + 1;
-                        endX = x + 1;
-                    } else {
-                        startX = x;
-                        endX = x;
-                    }
-                } else {
-                    startX = x;
-                    endX = x + length;
-                    if (isFinalWall) {
-                        startY = y + 1;
-                        endY = y + 1;
-                    } else {
-                        startY = y;
-                        endY = y;
-                    }
-                }
-                final OrderedPair<Integer> start = new OrderedPair<>(startX, startY), end = new OrderedPair<>(endX, endY);
-                linearWallModel.addWall(new LinearWallModel.Wall(start, end));
+                linearWallModel.addWall(createWallHelper(xMajor, isFinalWall, x, y, length));
                 i += length + additive;
             }
         }
+    }
+
+    private Space findNextSpace(final boolean xMajor, final int x, final int y, final int length) {
+        return maze.getGrid()[xMajor ? y + length : y][xMajor ? x : x + length];
+    }
+    private int findSameLaneX(final boolean xMajor, final int x, final int length) {
+        return xMajor ? x : x + length - 1;
+    }
+
+    private int findSameLaneY(final boolean xMajor, final int y, final int length) {
+        return xMajor ? y + length - 1 : y;
+    }
+
+    private int findPrevLaneX(final boolean xMajor, final int x, final int length) {
+        return xMajor ? x - 1 : x + length - 1;
+    }
+
+    private int findPrevLaneY(final boolean xMajor, final int y, final int length) {
+        return xMajor ? y + length - 1 : y - 1;
+    }
+
+    private Space findSpaceInPrevLane(final int prevLaneX, final int prevLaneY) {
+        return maze.isInBounds(prevLaneX, prevLaneY) ? maze.getGrid()[prevLaneY][prevLaneX] : null;
+    }
+
+    private LinearWallModel.Wall createWallHelper(final boolean xMajor, final boolean isFinalWall,
+            final int x, final int y, final int length) {
+        final int startX, startY, endX, endY;
+        if (xMajor) {
+            startY = y;
+            endY = y + length;
+            if (isFinalWall) {
+                startX = x + 1;
+                endX = x + 1;
+            } else {
+                startX = x;
+                endX = x;
+            }
+        } else {
+            startX = x;
+            endX = x + length;
+            if (isFinalWall) {
+                startY = y + 1;
+                endY = y + 1;
+            } else {
+                startY = y;
+                endY = y;
+            }
+        }
+        final OrderedPair<Integer> start = new OrderedPair<>(startX, startY), end = new OrderedPair<>(endX, endY);
+        return new LinearWallModel.Wall(start, end);
     }
 }

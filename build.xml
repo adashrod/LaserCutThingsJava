@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="GraphGeneration" basedir="." default="build"
-         xmlns:ivy="antlib:org.apache.ivy.ant">
+         xmlns:ivy="antlib:org.apache.ivy.ant"
+         xmlns:cs="antlib:com.puppycrawl.tools.checkstyle.ant">
 
     <property name="ivy.version"               value="2.4.0"/>
     <property name="ivy.dir"                   value="${basedir}/ivy"/>
@@ -19,6 +20,11 @@
         </fileset>
         <fileset dir="${lib.dir}">
             <include name="*.jar"/>
+        </fileset>
+    </path>
+    <path id="classpath.test">
+        <fileset dir="${lib.dir}/test">
+            <include name="**/*.jar"/>
         </fileset>
     </path>
 
@@ -42,7 +48,22 @@
         <ivy:retrieve pattern="${lib.dir}/[conf]/[type]/[organisation]-[artifact]-[revision].[ext]"/>
     </target>
 
-    <target name="compile" depends="ivy-resolve.main" description="compile source">
+    <target name="ivy-resolve.test" depends="ivy.install" description="resolve ivy dependencies for tests">
+        <ivy:retrieve pattern="${lib.dir}/[conf]/[type]/[organisation]-[artifact]-[revision].[ext]" conf="test"/>
+    </target>
+
+    <target name="checkstyle.install" depends="ivy-resolve.test" description="registers the checkstyle antlib in ant">
+        <echo message="registering checkstyle antlib..."/>
+        <taskdef resource="com/puppycrawl/tools/checkstyle/ant/antlib.xml" uri="antlib:com.puppycrawl.tools.checkstyle.ant" classpathref="classpath.test"/>
+    </target>
+
+    <target name="validation.checkstyle" depends="checkstyle.install" description="runs checkstyle static analysis on java src">
+        <cs:checkstyle config="src/main/resources/checkstyle.xml">
+            <fileset dir="src/main" includes="**/*.java"/>
+        </cs:checkstyle>
+    </target>
+
+    <target name="compile" depends="ivy-resolve.main, validation.checkstyle" description="compile source">
         <mkdir dir="${build.dir}"/>
         <javac destdir="${build.dir}" includeantruntime="false" classpathref="classpath.main">
             <src path="${main-java.dir}"/>
