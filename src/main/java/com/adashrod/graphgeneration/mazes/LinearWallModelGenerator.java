@@ -8,24 +8,23 @@ import static com.adashrod.graphgeneration.mazes.Direction.SOUTH;
 import static com.adashrod.graphgeneration.mazes.Direction.WEST;
 
 /**
- * An instance of MazeModelGenerator can be used to create a {@link MazeWallModel} from a {@link Maze}
+ * An instance of LinearWallModelGenerator can be used to create a {@link LinearWallModel} from a {@link Maze}
  * @author adashrod@gmail.com
  */
-public class MazeModelGenerator {
+public class LinearWallModelGenerator {
     private final Maze maze;
-    private final double interval = 20;
     private boolean favorEwWalls;
 
-    public MazeModelGenerator(final Maze maze) {
+    public LinearWallModelGenerator(final Maze maze) {
         this.maze = maze;
     }
 
     /**
-     * @see MazeModelGenerator#isFavorEwWalls()
+     * @see LinearWallModelGenerator#isFavorEwWalls()
      * @param favorEwWalls true for east-west, false for north-south
      * @return this
      */
-    public MazeModelGenerator setFavorEw(final boolean favorEwWalls) {
+    public LinearWallModelGenerator setFavorEw(final boolean favorEwWalls) {
         this.favorEwWalls = favorEwWalls;
         return this;
     }
@@ -40,42 +39,42 @@ public class MazeModelGenerator {
         return favorEwWalls;
     }
 
-    public MazeWallModel generate() {
+    public LinearWallModel generate() {
         return createWalls();
     }
 
-    private MazeWallModel createWalls() {
-        final MazeWallModel mazeWallModel = new MazeWallModel();
+    private LinearWallModel createWalls() {
+        final LinearWallModel linearWallModel = new LinearWallModel(maze.getNumCols(), maze.getNumRows(), favorEwWalls);
 
         final int width = maze.getNumCols(), height = maze.getNumRows(), lastCol = width - 1, lastRow = height - 1;
         if (favorEwWalls) {
             // make north walls of the rows
             for (int y = 0; y < height; y++) {
-                makeWallsForLane(mazeWallModel, y, width, false, NORTH, null, false);
+                makeWallsForLane(linearWallModel, y, width, false, NORTH, null, false);
             }
             // south wall of final row
-            makeWallsForLane(mazeWallModel, lastRow, width, false, SOUTH, null, true);
+            makeWallsForLane(linearWallModel, lastRow, width, false, SOUTH, null, true);
             // make west walls of columns
             for (int x = 0; x < width; x++) {
-                makeWallsForLane(mazeWallModel, x, height, true, WEST, SOUTH, false);
+                makeWallsForLane(linearWallModel, x, height, true, WEST, SOUTH, false);
             }
             // east wall of final column
-            makeWallsForLane(mazeWallModel, lastCol, height, true, EAST, null, true);
+            makeWallsForLane(linearWallModel, lastCol, height, true, EAST, SOUTH, true);
         } else {
             // make west walls of columns
             for (int x = 0; x < width; x++) {
-                makeWallsForLane(mazeWallModel, x, height, true, WEST, null, false);
+                makeWallsForLane(linearWallModel, x, height, true, WEST, null, false);
             }
             // east wall of final column
-            makeWallsForLane(mazeWallModel, lastCol, height, true, EAST, null, true);
+            makeWallsForLane(linearWallModel, lastCol, height, true, EAST, null, true);
             // make north walls of the rows
             for (int y = 0; y < height; y++) {
-                makeWallsForLane(mazeWallModel, y, width, false, NORTH, EAST, false);
+                makeWallsForLane(linearWallModel, y, width, false, NORTH, EAST, false);
             }
             // south wall of final row
-            makeWallsForLane(mazeWallModel, lastRow, width, false, SOUTH, null, true);
+            makeWallsForLane(linearWallModel, lastRow, width, false, SOUTH, EAST, true);
         }
-        return mazeWallModel;
+        return linearWallModel;
     }
 
     /**
@@ -89,7 +88,7 @@ public class MazeModelGenerator {
      *     wall would be split into 2 separate horizontal walls: one length 3, and one length 1, end-to-end, but separate
      *     so that the perpendicular wall doesn't overlap. If doing horizontal walls first, this would result in one
      *     horizontal wall 4 spaces long and two separate vertical walls.
-     * @param mazeWallModel              the model walls are being added to
+     * @param linearWallModel            the model walls are being added to
      * @param majorTraversalIndex        the index of the lane being traversed
      * @param minorTraversalMax          number of spaces in the lane
      * @param xMajor                     true if doing an x-major (column-major) traversal
@@ -102,7 +101,7 @@ public class MazeModelGenerator {
      * @param isFinalWall                true if this is the last row/column being checked, used for determining
      *                                   coordinates since n rows means n+1 rows of horizontal walls
      */
-    private void makeWallsForLane(final MazeWallModel mazeWallModel, final int majorTraversalIndex,
+    private void makeWallsForLane(final LinearWallModel linearWallModel, final int majorTraversalIndex,
             final int minorTraversalMax, final boolean xMajor, final Direction continuationCheckDirection,
             final Direction overlapCheckDirection, final boolean isFinalWall) {
         for (int i = 0; i < minorTraversalMax; i++) {
@@ -123,8 +122,11 @@ public class MazeModelGenerator {
                         final int prevLaneX = xMajor ? x - 1 : x + length - 1, prevLaneY = xMajor ? y + length - 1 : y - 1;
                         final Space spaceInSameLane = maze.getGrid()[sameLaneY][sameLaneX];
                         final Space spaceInPreviousLane = maze.isInBounds(prevLaneX, prevLaneY) ? maze.getGrid()[prevLaneY][prevLaneX] : null;
-                        if (spaceInPreviousLane != null &&
-                                !spaceInPreviousLane.isOpen(overlapCheckDirection) && !spaceInSameLane.isOpen(overlapCheckDirection)) {
+                        // 1st condition: check for perpendicular wall in same lane; 2nd: check for perpendicular wall
+                        // in prev lane, but not for final row because we don't care about prev lane when doing the outer
+                        // check
+                        if (!spaceInSameLane.isOpen(overlapCheckDirection) ||
+                                (!isFinalWall && spaceInPreviousLane != null && !spaceInPreviousLane.isOpen(overlapCheckDirection))) {
                             // i += length puts i just past the wall that's blocked by a perpendicular one; -1 is needed
                             // so that the next loop iter still checks that space after i++ happens
                             additive = -1;
@@ -132,7 +134,7 @@ public class MazeModelGenerator {
                         }
                     }
                 }
-                final double startX, startY, endX, endY;
+                final int startX, startY, endX, endY;
                 if (xMajor) {
                     startY = y;
                     endY = y + length;
@@ -154,9 +156,8 @@ public class MazeModelGenerator {
                         endY = y;
                     }
                 }
-                final OrderedPair<Double> start = new OrderedPair<>(startX * interval, startY * interval),
-                    end = new OrderedPair<>(endX * interval, endY * interval);
-                mazeWallModel.addWall(new MazeWallModel.Wall(start, end));
+                final OrderedPair<Integer> start = new OrderedPair<>(startX, startY), end = new OrderedPair<>(endX, endY);
+                linearWallModel.addWall(new LinearWallModel.Wall(start, end));
                 i += length + additive;
             }
         }

@@ -9,27 +9,39 @@ import java.io.PrintStream;
 import java.util.Objects;
 
 /**
- * Utility for printing {@link Maze}s and {@link MazeWallModel}s in various forms
+ * Utility for printing {@link Maze}s and {@link LinearWallModel}s in various forms
  * @author adashrod@gmail.com
  */
 public class MazePrinter {
     private final Maze maze;
-    private final MazeWallModel mazeWallModel;
+    private final LinearWallModel linearWallModel;
+    private final SheetWallModel sheetWallModel;
 
     /**
      * @param maze the maze to print with this MazePrinter instance
      */
     public MazePrinter(final Maze maze) {
         this.maze = maze;
-        this.mazeWallModel = null;
+        this.linearWallModel = null;
+        this.sheetWallModel = null;
     }
 
     /**
-     * @param mazeWallModel the maze to print with this MazePrinter instance
+     * @param linearWallModel the maze to print with this MazePrinter instance
      */
-    public MazePrinter(final MazeWallModel mazeWallModel) {
+    public MazePrinter(final LinearWallModel linearWallModel) {
         this.maze = null;
-        this.mazeWallModel = mazeWallModel;
+        this.linearWallModel = linearWallModel;
+        this.sheetWallModel = null;
+    }
+
+    /**
+     * @param sheetWallModel the maze to print with this MazePrinter instance
+     */
+    public MazePrinter(final SheetWallModel sheetWallModel) {
+        this.maze = null;
+        this.linearWallModel = null;
+        this.sheetWallModel = sheetWallModel;
     }
 
     /**
@@ -110,12 +122,12 @@ public class MazePrinter {
     }
 
     /**
-     * Mostly for debugging, creates an SVG file with rectangles representing the walls of the {@link this#mazeWallModel}
+     * Mostly for debugging, creates an SVG file with rectangles representing the walls of the {@link this#linearWallModel}
      * @param name filename to create
      */
     public void printTestSvg(final String name) {
-        if (mazeWallModel == null) {
-            throw new IllegalStateException("mazeWallModel can't be null");
+        if (linearWallModel == null) {
+            throw new IllegalStateException("linearWallModel can't be null");
         }
         try (final FileWriter fileWriter = new FileWriter(name)) {
             final InputStream headerStream = getClass().getResourceAsStream("/header.svg");
@@ -129,15 +141,15 @@ public class MazePrinter {
                 .append("inkscape:groupmode=\"layer\" ")
                 .append("id=\"layer1\">");
 
-            for (final MazeWallModel.Wall wall: mazeWallModel.walls) {
+            for (final LinearWallModel.Wall wall: linearWallModel.walls) {
                 final boolean vertical = Objects.equals(wall.start.x, wall.end.x);
                 final double addX = vertical ? 4 : 0;
                 final double addY = vertical ? 0 : 4;
                 fileWriter.append("<rect style=\"stroke:#000000;fill:none\" ")
-                    .append("x=\"").append(Double.toString(wall.start.x - addX)).append("\" ")
-                    .append("y=\"").append(Double.toString(wall.start.y - addY)).append("\" ")
-                    .append("width=\"").append(vertical ? "4" : Double.toString(Math.abs(wall.end.x - wall.start.x) - 4)).append("\" ")
-                    .append("height=\"").append(vertical ? Double.toString(Math.abs(wall.end.y - wall.start.y) - 4) : "4").append("\" ")
+                    .append("x=\"").append(Double.toString(wall.start.x * 20 - addX)).append("\" ")
+                    .append("y=\"").append(Double.toString(wall.start.y * 20 - addY)).append("\" ")
+                    .append("width=\"").append(vertical ? "4" : Double.toString(Math.abs(wall.end.x - wall.start.x) * 20 - 4)).append("\" ")
+                    .append("height=\"").append(vertical ? Double.toString(Math.abs(wall.end.y - wall.start.y) * 20 - 4) : "4").append("\" ")
                     .append("/>");
             }
 
@@ -147,5 +159,13 @@ public class MazePrinter {
         } catch (final IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Prints an SVG with shapes representing cut-out sections that will be the walls and floor of a maze
+     * @param name filename to create
+     */
+    public void printSvg(final String name) {
+        throw new IllegalArgumentException("NOT IMPLEMENTED!");
     }
 }
