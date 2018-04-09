@@ -84,7 +84,7 @@ public class CuttingBoard {
         paths.forEach((final Path p) -> p.scale(config.scaleFactor));
     }
 
-    public static CuttingBoardConfig config() {
+    public static CuttingBoardConfig configure() {
         return new CuttingBoardConfig();
     }
 
@@ -183,10 +183,8 @@ public class CuttingBoard {
             yStart = yStart.add(yOffset);
             yEnd = yEnd.add(yOffset);
         }
-        path.xStart = xStart;
-        path.xEnd = xEnd;
-        path.yStart = yStart;
-        path.yEnd = yEnd;
+        path.start = new OrderedPair<>(xStart, yStart);
+        path.end = new OrderedPair<>(xEnd, yEnd);
         return path;
     }
 
@@ -203,8 +201,8 @@ public class CuttingBoard {
     }
 
     private boolean ifCollinearMerge(final Path firstPath, final Path secondPath) {
-        final BigDecimal x = firstPath.xStart;
-        final BigDecimal[] xes = {firstPath.xEnd, secondPath.xStart, secondPath.xEnd};
+        final BigDecimal x = firstPath.start.x;
+        final BigDecimal[] xes = {firstPath.end.x, secondPath.start.x, secondPath.end.x};
         int i;
         for (i = 0; i < xes.length; i++) {
             if (!x.equals(xes[i])) {
@@ -212,47 +210,47 @@ public class CuttingBoard {
             }
         }
         if (i == xes.length) {
-            final BigDecimal mergedYStart = firstPath.yStart.min(firstPath.yEnd).min(secondPath.yStart).min(secondPath.yEnd);
-            final BigDecimal mergedYEnd = firstPath.yStart.max(firstPath.yEnd).max(secondPath.yStart).max(secondPath.yEnd);
-            firstPath.yStart = mergedYStart;
-            firstPath.yEnd = mergedYEnd;
+            final BigDecimal mergedYStart = firstPath.start.y.min(firstPath.end.y).min(secondPath.start.y).min(secondPath.end.y);
+            final BigDecimal mergedYEnd = firstPath.start.y.max(firstPath.end.y).max(secondPath.start.y).max(secondPath.end.y);
+            firstPath.start.y = mergedYStart;
+            firstPath.end.y = mergedYEnd;
             return true; // all xes ==, ifCollinearMerge on y-axis
         }
-        final BigDecimal y = firstPath.yStart;
-        final BigDecimal[] ys = {firstPath.yEnd, secondPath.yStart, secondPath.yEnd};
+        final BigDecimal y = firstPath.start.y;
+        final BigDecimal[] ys = {firstPath.end.y, secondPath.start.y, secondPath.end.y};
         for (i = 0; i < ys.length; i++) {
             if (!y.equals(ys[i])) {
                 break;
             }
         }
         if (i == ys.length) {
-            final BigDecimal mergedXStart = firstPath.xStart.min(firstPath.xEnd).min(secondPath.xStart).min(secondPath.xEnd);
-            final BigDecimal mergedXEnd = firstPath.xStart.max(firstPath.xEnd).max(secondPath.xStart).max(secondPath.xEnd);
-            firstPath.xStart = mergedXStart;
-            firstPath.xEnd = mergedXEnd;
+            final BigDecimal mergedXStart = firstPath.start.x.min(firstPath.end.x).min(secondPath.start.x).min(secondPath.end.x);
+            final BigDecimal mergedXEnd = firstPath.start.x.max(firstPath.end.x).max(secondPath.start.x).max(secondPath.end.x);
+            firstPath.start.x = mergedXStart;
+            firstPath.end.x = mergedXEnd;
             return true; // all ys ==, ifCollinearMerge on x-axis
         }
         return false;
     }
 
     private boolean ifAdjacentAndCollinearMerge(final Path firstPath, final Path secondPath) {
-        if (firstPath.xStart.equals(secondPath.xStart)) {
-            if (firstPath.yStart.equals(secondPath.yStart)) {
+        if (firstPath.start.x.equals(secondPath.start.x)) {
+            if (firstPath.start.y.equals(secondPath.start.y)) {
                 return ifCollinearMerge(firstPath, secondPath);
             }
         }
-        if (firstPath.xStart.equals(secondPath.xEnd)) {
-            if (firstPath.yStart.equals(secondPath.yEnd)) {
+        if (firstPath.start.x.equals(secondPath.end.x)) {
+            if (firstPath.start.y.equals(secondPath.end.y)) {
                 return ifCollinearMerge(firstPath, secondPath);
             }
         }
-        if (firstPath.xEnd.equals(secondPath.xStart)) {
-            if (firstPath.yEnd.equals(secondPath.yStart)) {
+        if (firstPath.end.x.equals(secondPath.start.x)) {
+            if (firstPath.end.y.equals(secondPath.start.y)) {
                 return ifCollinearMerge(firstPath, secondPath);
             }
         }
-        if (firstPath.xEnd.equals(secondPath.xEnd)) {
-            if (firstPath.yEnd.equals(secondPath.yEnd)) {
+        if (firstPath.end.x.equals(secondPath.end.x)) {
+            if (firstPath.end.y.equals(secondPath.end.y)) {
                 return ifCollinearMerge(firstPath, secondPath);
             }
         }
