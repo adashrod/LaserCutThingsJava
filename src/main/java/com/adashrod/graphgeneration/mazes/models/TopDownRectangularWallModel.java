@@ -1,9 +1,11 @@
 package com.adashrod.graphgeneration.mazes.models;
 
+import com.adashrod.graphgeneration.common.OrderedPair;
 import com.adashrod.graphgeneration.mazes.Direction;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 
 import static com.adashrod.graphgeneration.mazes.Direction.EAST;
 import static com.adashrod.graphgeneration.mazes.Direction.NORTH;
@@ -17,8 +19,9 @@ import static com.adashrod.graphgeneration.mazes.Direction.WEST;
  * @author adashrod@gmail.com
  */
 public class TopDownRectangularWallModel {
+    // todo: grid is only used for printing and by Tdrwmg to create walls; could refactor it out of here into Tdrwmg and printing into MazePrinter
     public final Space[][] grid;
-    double wallWidth, hallWidth;
+    public final List<Wall> walls = new ArrayList<>();
 
     public TopDownRectangularWallModel(final int width, final int height) {
         grid = new Space[height][width];
@@ -29,9 +32,14 @@ public class TopDownRectangularWallModel {
         }
     }
 
+    public TopDownRectangularWallModel addWall(final Wall wall) {
+        walls.add(wall);
+        return this;
+    }
+
     public static class Space {
         public boolean isWall;
-        public final Collection<Direction> endDirections = new HashSet<>(); // todo: get rid of direct access
+        public final Collection<Direction> endDirections = new ArrayList<>(); // todo: get rid of direct access
 
         @Override
         public String toString() {
@@ -65,5 +73,22 @@ public class TopDownRectangularWallModel {
             builder.append("\n");
         }
         return builder.toString();
+    }
+
+    public static class Wall {
+        public final OrderedPair<Integer> start, end;
+        public final int length;
+        private final Direction wallDirection;
+
+        public Wall(final OrderedPair<Integer> start, final OrderedPair<Integer> end, final Direction wallDirection) {
+            this.start = start;
+            this.end = end;
+            length = Math.max(end.y - start.y + 1, end.x - start.x + 1);
+            this.wallDirection = wallDirection;
+        }
+
+        public Direction getWallDirection() {
+            return wallDirection;
+        }
     }
 }

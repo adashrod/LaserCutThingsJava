@@ -1,5 +1,6 @@
 package com.adashrod.graphgeneration.mazes.factories;
 
+import com.adashrod.graphgeneration.common.OrderedPair;
 import com.adashrod.graphgeneration.mazes.Direction;
 import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
 import com.adashrod.graphgeneration.mazes.models.TopDownRectangularWallModel;
@@ -74,6 +75,10 @@ public class TopDownRectangularWallModelGenerator {
                     if (topDownRectangularWallModel.grid[wey][wex].isWall) { wex--; }
                 }
             }
+            // todo: consider whether to have all of the following statements in the model setters or here (anemic domain model)
+            final TopDownRectangularWallModel.Wall tdrWall = new TopDownRectangularWallModel.Wall(new OrderedPair<>(wsx, wsy),
+                new OrderedPair<>(wex, wey), endDirection);
+            topDownRectangularWallModel.addWall(tdrWall);
             topDownRectangularWallModel.grid[wsy][wsx].endDirections.add(startDirection);
             topDownRectangularWallModel.grid[wey][wex].endDirections.add(endDirection);
             if (wallsAreVertical) {
