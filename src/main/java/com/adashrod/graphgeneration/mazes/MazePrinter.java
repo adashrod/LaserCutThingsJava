@@ -175,6 +175,9 @@ public class MazePrinter {
      * @param name filename to create
      */
     public void printSvg(final String name) {
+        if (sheetWallModel == null) {
+            throw new IllegalStateException("sheetWallModel can't be null");
+        }
         throw new IllegalArgumentException("NOT IMPLEMENTED!");
     }
 }
