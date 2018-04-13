@@ -2,7 +2,6 @@ package com.adashrod.graphgeneration;
 
 import com.adashrod.graphgeneration.cuttingboardgrids.CuttingBoard;
 import com.adashrod.graphgeneration.mazes.MazePrinter;
-import com.adashrod.graphgeneration.mazes.algorithms.KruskalsAlgorithm;
 import com.adashrod.graphgeneration.mazes.algorithms.PrimsAlgorithm;
 import com.adashrod.graphgeneration.mazes.factories.LinearWallModelGenerator;
 import com.adashrod.graphgeneration.mazes.factories.SheetWallModelGenerator;
@@ -15,8 +14,6 @@ import com.adashrod.graphgeneration.mazes.models.TopDownRectangularWallModel;
 import java.io.IOException;
 import java.math.BigDecimal;
 
-import static com.adashrod.graphgeneration.mazes.Direction.EAST;
-import static com.adashrod.graphgeneration.mazes.Direction.SOUTH;
 import static com.adashrod.graphgeneration.mazes.Direction.WEST;
 
 /**
@@ -56,69 +53,12 @@ public final class Main {
     }
 
     public static void main(final String... args) throws Exception {
-        final BigDecimal hallWidth = new BigDecimal(100), materialThickness = new BigDecimal(10),
-            wallHeight = new BigDecimal(50), notchHeight = new BigDecimal(20), separationSpace = new BigDecimal(5);
         final Maze maze = new Maze(8, 8);
-        LinearWallModel linearWallModel;
-        TopDownRectangularWallModel topDownRectangularWallModel;
-        SheetWallModel sheetWallModel;
+        final LinearWallModel linearWallModel;
+        final TopDownRectangularWallModel topDownRectangularWallModel;
+        final SheetWallModel sheetWallModel;
 
-        maze.build(new PrimsAlgorithm());
-        System.out.println("prim's:");
-        new MazePrinter(maze).printAsciiArt();
-        linearWallModel = new LinearWallModelGenerator(maze).generate();
-        new MazePrinter(linearWallModel).printTestSvg("primsNs.svg");
-        linearWallModel = new LinearWallModelGenerator(maze).setFavorEw(true).generate();
-        new MazePrinter(linearWallModel).printTestSvg("primsEw.svg");
-
-        maze.build(new KruskalsAlgorithm());
-        System.out.println("kruskal's");
-        new MazePrinter(maze).printAsciiArt();
-        linearWallModel = new LinearWallModelGenerator(maze).setFavorEw(false).generate();
-        new MazePrinter(linearWallModel).printTestSvg("kruskalsNs.svg");
-//        topDownRectangularWallModel = new TopDownRectangularWallModelGenerator(linearWallModel).generate();
-//        System.out.printf("kruskalsNs chars:\n%s\n", topDownRectangularWallModel.toString());
-        linearWallModel = new LinearWallModelGenerator(maze).setFavorEw(true).generate();
-        new MazePrinter(linearWallModel).printTestSvg("kruskalsEw.svg");
-        topDownRectangularWallModel = new TopDownRectangularWallModelGenerator(linearWallModel).generate();
-//        topDownRectangularWallModel = new TopDownRectangularWallModelGenerator(linearWallModel).generate();
-//        System.out.printf("kruskalsEw chars:\n%s\n", topDownRectangularWallModel);
-        sheetWallModel = new SheetWallModelGenerator(topDownRectangularWallModel, SheetWallModelGenerator.configure()
-            .withHallWidth(hallWidth)
-            .withMaterialThickness(materialThickness)
-            .withWallHeight(wallHeight)
-            .withNotchHeight(notchHeight)
-            .withSeparationSpace(separationSpace)
-            .build()).generate();
-        new MazePrinter(sheetWallModel).printSvg("kruskalsCuts.svg");
-
-        // testing testing
-        final int smallMazeSize = 3;
-        final Maze smallMaze = new Maze(smallMazeSize, smallMazeSize);
-        smallMaze.build(new PrimsAlgorithm().setSeed(0));
-        smallMaze.getGrid()[0][0].openWall(WEST);
-        smallMaze.getGrid()[smallMazeSize - 1][smallMazeSize - 1].openWall(EAST);
-        smallMaze.getGrid()[smallMazeSize - 1][smallMazeSize - 1].openWall(SOUTH);
-
-        linearWallModel = new LinearWallModelGenerator(smallMaze).setFavorEw(false).generate();
-        topDownRectangularWallModel = new TopDownRectangularWallModelGenerator(linearWallModel).generate();
-        System.out.printf("TOP DOWN RECTANGULAR MODEL:\n%s\n", topDownRectangularWallModel);
-
-
-        sheetWallModel = new SheetWallModelGenerator(topDownRectangularWallModel, SheetWallModelGenerator.configure()
-            .withHallWidth(hallWidth)
-            .withMaterialThickness(materialThickness)
-            .withWallHeight(wallHeight)
-            .withNotchHeight(notchHeight)
-            .withSeparationSpace(separationSpace)
-            .build()).generate();
-
-        new MazePrinter(smallMaze).printAsciiArt();
-        new MazePrinter(linearWallModel).printTestSvg("smallMaze.svg");
-        new MazePrinter(sheetWallModel).printSvg("smallMazeCuts.svg");
-
-        System.out.println("ACTUAL TEST MAZE");
-        final long seed = 1523537931673L;//System.currentTimeMillis();
+        final long seed = System.currentTimeMillis();
         maze.build(new PrimsAlgorithm().setSeed(seed));
         maze.getGrid()[0][0].openWall(WEST);
         System.out.printf("seed: %d\n", seed);
