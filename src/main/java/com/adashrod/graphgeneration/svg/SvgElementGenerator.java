@@ -42,4 +42,10 @@ public class SvgElementGenerator {
         }
         return String.format("<path style=\"%s\" d=\"%s\" id=\"%s\"/>", path.style, dAttrBuilder.toString(), path.id != null ? path.id : "");
     }
+
+    public String circleToSvgText(final Circle circle, final int fpPrecision) {
+        final MathContext mc = new MathContext(fpPrecision);
+        return String.format("<circle cx=\"%s\" cy=\"%s\" r=\"%s\" stroke=\"black\" stroke-width=\"1\" fill=\"none\" />",
+            circle.center.x.round(mc), circle.center.y.round(mc), circle.radius.round(mc));
+    }
 }
