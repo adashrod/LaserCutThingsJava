@@ -24,10 +24,18 @@ import static java.math.BigDecimal.ZERO;
  * @author adashrod@gmail.com
  */
 public class SheetWallModelGenerator {
+    public static final BigDecimal PPI = new BigDecimal("90.000001");
+    public static final BigDecimal DEFAULT_WALL_HEIGHT = PPI.multiply(new BigDecimal("0.5"));
+    public static final BigDecimal DEFAULT_MATERIAL_THICKNESS = PPI.multiply(new BigDecimal(".118"));
+    public static final BigDecimal DEFAULT_HALL_WIDTH = PPI.multiply(new BigDecimal("0.5"));;
+    public static final BigDecimal DEFAULT_NOTCH_HEIGHT = PPI.multiply(new BigDecimal(".118")); // 3 mm
+    public static final BigDecimal DEFAULT_SEPARATION_SPACE = PPI.multiply(new BigDecimal(".05"));;
+
     private final BigDecimal wallHeight;
     private final BigDecimal materialThickness;
     private final BigDecimal hallWidth;
-    private final BigDecimal notchHeight = new BigDecimal(2); // todo: configurable? must be < hallWidth / 2
+    private final BigDecimal notchHeight;
+    private final BigDecimal separationSpace;
 
     private final Map<SheetWallModel.Path, NotchPosInfo> notchEdgeMap = new HashMap<>();
     private final TopDownRectangularWallModel model;
@@ -45,60 +53,32 @@ public class SheetWallModelGenerator {
         this.wallHeight = config.wallHeight;
         this.materialThickness = config.materialThickness;
         this.hallWidth = config.hallWidth;
+        this.notchHeight = config.notchHeight;
+        this.separationSpace = config.separationSpace;
     }
 
     public SheetWallModel generate() {
         final SheetWallModel sheetWallModel = new SheetWallModel();
 
-        model.walls.forEach((final TopDownRectangularWallModel.Wall wall) -> {
-            final SheetWallModel.Path wallPath = new SheetWallModel.Path(); // the path of the wall cutout
-            final BigDecimal wallLength;
-            // notches in the floor for the wall tabs to fit into
-            final SheetWallModel.Path firstNotch = new SheetWallModel.Path(),
-                secondNotch = new SheetWallModel.Path();
-            if (wall.getWallDirection() == EAST) {
-                wallLength = calcDisplacement(wall.end.x + 1)
-                    .subtract(calcDisplacement(wall.start.x));
-                final BigDecimal startDisplacementX = calcDisplacement(wall.start.x),
-                    endDisplacementX = calcDisplacement(wall.end.x + 1).subtract(notchHeight),
-                    displacementY = calcDisplacement(wall.start.y);
-                firstNotch.addPoint(new OrderedPair<>(startDisplacementX, displacementY))
-                    .addPoint(new OrderedPair<>(startDisplacementX.add(notchHeight), displacementY))
-                    .addPoint(new OrderedPair<>(startDisplacementX.add(notchHeight), displacementY.add(materialThickness)))
-                    .addPoint(new OrderedPair<>(startDisplacementX, displacementY.add(materialThickness)));
-                secondNotch.addPoint(new OrderedPair<>(endDisplacementX, displacementY))
-                    .addPoint(new OrderedPair<>(endDisplacementX.add(notchHeight), displacementY))
-                    .addPoint(new OrderedPair<>(endDisplacementX.add(notchHeight), displacementY.add(materialThickness)))
-                    .addPoint(new OrderedPair<>(endDisplacementX, displacementY.add(materialThickness)));
-            } else {
-                wallLength = calcDisplacement(wall.end.y + 1)
-                    .subtract(calcDisplacement(wall.start.y));
-                final BigDecimal startDisplacementY = calcDisplacement(wall.start.y),
-                    endDisplacementY = calcDisplacement(wall.end.y + 1).subtract(notchHeight),
-                    displacementX = calcDisplacement(wall.start.x);
-                firstNotch.addPoint(new OrderedPair<>(displacementX, startDisplacementY))
-                    .addPoint(new OrderedPair<>(displacementX.add(materialThickness), startDisplacementY))
-                    .addPoint(new OrderedPair<>(displacementX.add(materialThickness), startDisplacementY.add(notchHeight)))
-                    .addPoint(new OrderedPair<>(displacementX, startDisplacementY.add(notchHeight)));
-                secondNotch.addPoint(new OrderedPair<>(displacementX, endDisplacementY))
-                    .addPoint(new OrderedPair<>(displacementX.add(materialThickness), endDisplacementY))
-                    .addPoint(new OrderedPair<>(displacementX.add(materialThickness), endDisplacementY.add(notchHeight)))
-                    .addPoint(new OrderedPair<>(displacementX, endDisplacementY.add(notchHeight)));
-            }
-            addNotchToEdgeMap(wall.start, firstNotch);
-            addNotchToEdgeMap(wall.end, secondNotch);
+        final BigDecimal floorWidth = calcDisplacement(model.grid[0].length);
+        final OrderedPair<BigDecimal> cursor = new OrderedPair<>(floorWidth.add(separationSpace), ZERO);
+        for (final TopDownRectangularWallModel.Wall wall: model.walls) {
+            final BigDecimal wallLength = createNotchesForWall(wall, sheetWallModel);
 
-            wallPath.addPoint(new OrderedPair<>(ZERO, ZERO))
+            // the path of the wall cutout
+            final SheetWallModel.Path wallPath = new SheetWallModel.Path()
+                .addPoint(new OrderedPair<>(ZERO, ZERO))
                 .addPoint(new OrderedPair<>(wallLength, ZERO))
                 .addPoint(new OrderedPair<>(wallLength, wallHeight.add(materialThickness)))
                 .addPoint(new OrderedPair<>(wallLength.subtract(notchHeight), wallHeight.add(materialThickness)))
                 .addPoint(new OrderedPair<>(wallLength.subtract(notchHeight), wallHeight))
                 .addPoint(new OrderedPair<>(notchHeight, wallHeight))
                 .addPoint(new OrderedPair<>(notchHeight, wallHeight.add(materialThickness)))
-                .addPoint(new OrderedPair<>(ZERO, wallHeight.add(materialThickness)));
+                .addPoint(new OrderedPair<>(ZERO, wallHeight.add(materialThickness)))
+                .translate(cursor);
             sheetWallModel.addShape(new SheetWallModel.Shape(wallPath));
-            sheetWallModel.floorNotches.addPath(firstNotch).addPath(secondNotch);
-        });
+            cursor.y = cursor.y.add(wallPath.findHeight()).add(separationSpace);
+        }
         createOutline(sheetWallModel);
         return sheetWallModel;
     }
@@ -116,6 +96,45 @@ public class SheetWallModelGenerator {
         return materialThickness.multiply(mtFactor).add(hallWidth.multiply(hwFactor));
     }
 
+    private BigDecimal createNotchesForWall(final TopDownRectangularWallModel.Wall wall, final SheetWallModel sheetWallModel) {
+        // notches in the floor for the wall tabs to fit into
+        final SheetWallModel.Path firstNotch = new SheetWallModel.Path(),
+            secondNotch = new SheetWallModel.Path();
+        final BigDecimal wallLength;
+        if (wall.getWallDirection() == EAST) {
+            wallLength = calcDisplacement(wall.end.x + 1)
+                .subtract(calcDisplacement(wall.start.x));
+            final BigDecimal startDisplacementX = calcDisplacement(wall.start.x),
+                endDisplacementX = calcDisplacement(wall.end.x + 1).subtract(notchHeight),
+                displacementY = calcDisplacement(wall.start.y);
+            firstNotch.addPoint(new OrderedPair<>(startDisplacementX, displacementY))
+                .addPoint(new OrderedPair<>(startDisplacementX.add(notchHeight), displacementY))
+                .addPoint(new OrderedPair<>(startDisplacementX.add(notchHeight), displacementY.add(materialThickness)))
+                .addPoint(new OrderedPair<>(startDisplacementX, displacementY.add(materialThickness)));
+            secondNotch.addPoint(new OrderedPair<>(endDisplacementX, displacementY))
+                .addPoint(new OrderedPair<>(endDisplacementX.add(notchHeight), displacementY))
+                .addPoint(new OrderedPair<>(endDisplacementX.add(notchHeight), displacementY.add(materialThickness)))
+                .addPoint(new OrderedPair<>(endDisplacementX, displacementY.add(materialThickness)));
+        } else {
+            wallLength = calcDisplacement(wall.end.y + 1)
+                .subtract(calcDisplacement(wall.start.y));
+            final BigDecimal startDisplacementY = calcDisplacement(wall.start.y),
+                endDisplacementY = calcDisplacement(wall.end.y + 1).subtract(notchHeight),
+                displacementX = calcDisplacement(wall.start.x);
+            firstNotch.addPoint(new OrderedPair<>(displacementX, startDisplacementY))
+                .addPoint(new OrderedPair<>(displacementX.add(materialThickness), startDisplacementY))
+                .addPoint(new OrderedPair<>(displacementX.add(materialThickness), startDisplacementY.add(notchHeight)))
+                .addPoint(new OrderedPair<>(displacementX, startDisplacementY.add(notchHeight)));
+            secondNotch.addPoint(new OrderedPair<>(displacementX, endDisplacementY))
+                .addPoint(new OrderedPair<>(displacementX.add(materialThickness), endDisplacementY))
+                .addPoint(new OrderedPair<>(displacementX.add(materialThickness), endDisplacementY.add(notchHeight)))
+                .addPoint(new OrderedPair<>(displacementX, endDisplacementY.add(notchHeight)));
+        }
+        addNotchToEdgeMap(wall.start, firstNotch);
+        addNotchToEdgeMap(wall.end, secondNotch);
+        sheetWallModel.floorNotches.addPath(firstNotch).addPath(secondNotch);
+        return wallLength;
+    }
     /**
      * Each notch that touches the edge of the floor is kept in notchEdgeMap to keep track of which edge it's touching.
      * For notches that are on corner squares, they are only considered part of one edge; it is the edge that is further
@@ -230,22 +249,29 @@ public class SheetWallModelGenerator {
         return new ConfigBuilder();
     }
 
-    public static class Config {
+    private static class Config {
         private final BigDecimal wallHeight;
         private final BigDecimal materialThickness;
         private final BigDecimal hallWidth;
+        private final BigDecimal notchHeight;
+        private final BigDecimal separationSpace;
 
-        public Config(final BigDecimal wallHeight, final BigDecimal materialThickness, final BigDecimal hallWidth) {
+        public Config(final BigDecimal wallHeight, final BigDecimal materialThickness, final BigDecimal hallWidth,
+                final BigDecimal notchHeight, final BigDecimal separationSpace) {
             this.wallHeight = wallHeight;
             this.materialThickness = materialThickness;
             this.hallWidth = hallWidth;
+            this.notchHeight = notchHeight;
+            this.separationSpace = separationSpace;
         }
     }
 
     public static class ConfigBuilder {
-        private BigDecimal wallHeight;
-        private BigDecimal materialThickness;
-        private BigDecimal hallWidth;
+        private BigDecimal wallHeight = DEFAULT_WALL_HEIGHT;
+        private BigDecimal materialThickness = DEFAULT_MATERIAL_THICKNESS;
+        private BigDecimal hallWidth = DEFAULT_HALL_WIDTH;
+        private BigDecimal notchHeight = DEFAULT_NOTCH_HEIGHT;
+        private BigDecimal separationSpace = DEFAULT_SEPARATION_SPACE;
 
         public ConfigBuilder withWallHeight(final BigDecimal wallHeight) {
             this.wallHeight = wallHeight;
@@ -262,6 +288,16 @@ public class SheetWallModelGenerator {
             return this;
         }
 
+        public ConfigBuilder withNotchHeight(final BigDecimal notchHeight) {
+            this.notchHeight = notchHeight;
+            return this;
+        }
+
+        public ConfigBuilder withSeparationSpace(final BigDecimal separationSpace) {
+            this.separationSpace = separationSpace;
+            return this;
+        }
+
         public Config build() {
             final StringBuilder errors = new StringBuilder();
             if (wallHeight.compareTo(ZERO) <= 0) {
@@ -273,11 +309,17 @@ public class SheetWallModelGenerator {
             if (hallWidth.compareTo(ZERO) <= 0) {
                 errors.append("hallWidth must be positive; ");
             }
+            if (separationSpace.compareTo(ZERO) <= 0) {
+                errors.append("separationSpace must be positive; ");
+            }
+            if (notchHeight.multiply(new BigDecimal(2)).compareTo(hallWidth) >= 0) {
+                errors.append("notchHeight must be less than half of hallWidth; ");
+            }
             if (errors.length() > 0) {
                 errors.delete(errors.length() - 2, errors.length());
                 throw new IllegalArgumentException(errors.toString());
             }
-            return new Config(wallHeight, materialThickness, hallWidth);
+            return new Config(wallHeight, materialThickness, hallWidth, notchHeight, separationSpace);
         }
     }
 

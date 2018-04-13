@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 
 import static com.adashrod.graphgeneration.mazes.Direction.EAST;
+import static com.adashrod.graphgeneration.mazes.Direction.SOUTH;
 import static com.adashrod.graphgeneration.mazes.Direction.WEST;
 
 /**
@@ -54,7 +55,9 @@ public final class Main {
         System.out.printf("took %d ms to gen svg\n", System.currentTimeMillis() - start);
     }
 
-    public static void main(final String... args) throws IOException {
+    public static void main(final String... args) throws Exception {
+        final BigDecimal hallWidth = new BigDecimal(100), materialThickness = new BigDecimal(10),
+            wallHeight = new BigDecimal(50), notchHeight = new BigDecimal(20), separationSpace = new BigDecimal(5);
         final Maze maze = new Maze(8, 8);
         LinearWallModel linearWallModel;
         TopDownRectangularWallModel topDownRectangularWallModel;
@@ -77,8 +80,17 @@ public final class Main {
 //        System.out.printf("kruskalsNs chars:\n%s\n", topDownRectangularWallModel.toString());
         linearWallModel = new LinearWallModelGenerator(maze).setFavorEw(true).generate();
         new MazePrinter(linearWallModel).printTestSvg("kruskalsEw.svg");
+        topDownRectangularWallModel = new TopDownRectangularWallModelGenerator(linearWallModel).generate();
 //        topDownRectangularWallModel = new TopDownRectangularWallModelGenerator(linearWallModel).generate();
 //        System.out.printf("kruskalsEw chars:\n%s\n", topDownRectangularWallModel);
+        sheetWallModel = new SheetWallModelGenerator(topDownRectangularWallModel, SheetWallModelGenerator.configure()
+            .withHallWidth(hallWidth)
+            .withMaterialThickness(materialThickness)
+            .withWallHeight(wallHeight)
+            .withNotchHeight(notchHeight)
+            .withSeparationSpace(separationSpace)
+            .build()).generate();
+        new MazePrinter(sheetWallModel).printSvg("kruskalsCuts.svg");
 
         // testing testing
         final int smallMazeSize = 3;
@@ -86,18 +98,35 @@ public final class Main {
         smallMaze.build(new PrimsAlgorithm().setSeed(0));
         smallMaze.getGrid()[0][0].openWall(WEST);
         smallMaze.getGrid()[smallMazeSize - 1][smallMazeSize - 1].openWall(EAST);
-//        smallMaze.getGrid()[smallMazeSize - 1][smallMazeSize - 1].openWall(SOUTH);
+        smallMaze.getGrid()[smallMazeSize - 1][smallMazeSize - 1].openWall(SOUTH);
 
         linearWallModel = new LinearWallModelGenerator(smallMaze).setFavorEw(false).generate();
         topDownRectangularWallModel = new TopDownRectangularWallModelGenerator(linearWallModel).generate();
         System.out.printf("TOP DOWN RECTANGULAR MODEL:\n%s\n", topDownRectangularWallModel);
+
+
         sheetWallModel = new SheetWallModelGenerator(topDownRectangularWallModel, SheetWallModelGenerator.configure()
-            .withHallWidth(new BigDecimal(10))
-            .withMaterialThickness(new BigDecimal(1))
-            .withWallHeight(new BigDecimal(5))
+            .withHallWidth(hallWidth)
+            .withMaterialThickness(materialThickness)
+            .withWallHeight(wallHeight)
+            .withNotchHeight(notchHeight)
+            .withSeparationSpace(separationSpace)
             .build()).generate();
 
         new MazePrinter(smallMaze).printAsciiArt();
         new MazePrinter(linearWallModel).printTestSvg("smallMaze.svg");
+        new MazePrinter(sheetWallModel).printSvg("smallMazeCuts.svg");
+
+        System.out.println("ACTUAL TEST MAZE");
+        final long seed = 1523537931673L;//System.currentTimeMillis();
+        maze.build(new PrimsAlgorithm().setSeed(seed));
+        maze.getGrid()[0][0].openWall(WEST);
+        System.out.printf("seed: %d\n", seed);
+        new MazePrinter(maze).printAsciiArt();
+        linearWallModel = new LinearWallModelGenerator(maze).generate();
+        new MazePrinter(linearWallModel).printTestSvg("actualTestMaze.svg");
+        topDownRectangularWallModel = new TopDownRectangularWallModelGenerator(linearWallModel).generate();
+        sheetWallModel = new SheetWallModelGenerator(topDownRectangularWallModel, SheetWallModelGenerator.configure().build()).generate();
+        new MazePrinter(sheetWallModel).printSvg("actualTestMazeCuts.svg");
     }
 }

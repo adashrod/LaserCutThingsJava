@@ -17,7 +17,7 @@ import java.util.Objects;
 public class SheetWallModel {
     public final Shape floorNotches = new Shape();
     public final Shape floorOutline = new Shape();
-    private final Collection<Shape> walls = new ArrayList<>();
+    public final Collection<Shape> walls = new ArrayList<>();
 
     public SheetWallModel addShape(final Shape shape) {
         walls.add(shape);
@@ -25,7 +25,7 @@ public class SheetWallModel {
     }
 
     /**
-     * A shape is a collection of closed paths. It can have one or many paths that are each not connected to each other.
+     * A shape is a collection of paths. It can have one or many paths that are each not connected to each other.
      */
     public static class Shape {
         public final List<Path> paths = new ArrayList<>();
@@ -42,12 +42,7 @@ public class SheetWallModel {
         }
 
         public Shape translate(final OrderedPair<BigDecimal> delta) {
-            paths.forEach((final Path path) -> {
-                path.points.forEach((final OrderedPair<BigDecimal> point) -> {
-                    point.x = point.x.add(delta.x);
-                    point.y = point.y.add(delta.y);
-                });
-            });
+            paths.forEach(path -> path.translate(delta));
             return this;
         }
     }
@@ -74,6 +69,27 @@ public class SheetWallModel {
 
         public Path setClosed(final boolean isClosed) {
             this.isClosed = isClosed;
+            return this;
+        }
+
+        public BigDecimal findHeight() {
+            BigDecimal minimum = null, maximum = null;
+            for (final OrderedPair<BigDecimal> point: points) {
+                if (minimum == null || minimum.compareTo(point.y) > 0) {
+                    minimum = point.y;
+                }
+                if (maximum == null || maximum.compareTo(point.y) < 0) {
+                    maximum = point.y;
+                }
+            }
+            return maximum.subtract(minimum);
+        }
+
+        public Path translate(final OrderedPair<BigDecimal> delta) {
+            points.forEach((final OrderedPair<BigDecimal> point) -> {
+                point.x = point.x.add(delta.x);
+                point.y = point.y.add(delta.y);
+            });
             return this;
         }
 

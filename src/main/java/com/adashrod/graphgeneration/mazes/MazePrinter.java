@@ -3,6 +3,8 @@ package com.adashrod.graphgeneration.mazes;
 import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
 import com.adashrod.graphgeneration.mazes.models.Maze;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
+import com.adashrod.graphgeneration.svg.Path;
+import com.adashrod.graphgeneration.svg.SvgElementGenerator;
 
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -19,7 +21,9 @@ import java.util.Objects;
 public class MazePrinter {
     private final Maze maze;
     private final LinearWallModel linearWallModel;
-    private final SheetWallModel sheetWallModel;
+    public final SheetWallModel sheetWallModel;
+
+    public int precision = 5;
 
     /**
      * @param maze the maze to print with this MazePrinter instance
@@ -174,10 +178,42 @@ public class MazePrinter {
      * Prints an SVG with shapes representing cut-out sections that will be the walls and floor of a maze
      * @param name filename to create
      */
-    public void printSvg(final String name) {
+    public void printSvg(final String name) throws IOException {
         if (sheetWallModel == null) {
             throw new IllegalStateException("sheetWallModel can't be null");
         }
-        throw new IllegalArgumentException("NOT IMPLEMENTED!");
+        try (final FileWriter fileWriter = new FileWriter(name)) {
+            final InputStream headerStream = getClass().getResourceAsStream("/header.svg");
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(headerStream));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                fileWriter.append(line).append("\n");
+            }
+            final SvgElementGenerator svgElementGenerator = new SvgElementGenerator();
+
+            fileWriter.append("<g id=\"floor\">");
+            for (final SheetWallModel.Path notch: sheetWallModel.floorNotches.paths) {
+                final Path svgPath = svgElementGenerator.sheetPathToSvgPath(notch);
+                fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
+            }
+
+            for (final SheetWallModel.Path outlinePath: sheetWallModel.floorOutline.paths) {
+                final Path svgPath = svgElementGenerator.sheetPathToSvgPath(outlinePath);
+                fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
+            }
+            fileWriter.append("</g>\n");
+
+            fileWriter.append("<g id=\"walls\">");
+            for (final SheetWallModel.Shape shape: sheetWallModel.walls) {
+                for (final SheetWallModel.Path wall: shape.paths) {
+                    final Path svgPath = svgElementGenerator.sheetPathToSvgPath(wall);
+                    fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
+                }
+            }
+            fileWriter.append("</g>\n");
+
+            fileWriter.append("</svg>\n");
+            fileWriter.flush();
+        }
     }
 }
