@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
+ * todo
  * Created by aaron on 2018-04-01.
  */
 public class Rect {
@@ -46,20 +47,7 @@ public class Rect {
             return false;
         }
         final Rect aRect = (Rect) anObject;
-        if (!width.equals(aRect.width)) {
-            return false;
-        }
-        if (!height.equals(aRect.height)) {
-            return false;
-        }
-        if (!x.equals(aRect.x)) {
-            return false;
-        }
-        if (!y.equals(aRect.y)) {
-            return false;
-        }
-
-        return true;
+        return width.equals(aRect.width) && height.equals(aRect.height) && x.equals(aRect.x) && y.equals(aRect.y);
     }
 
 }

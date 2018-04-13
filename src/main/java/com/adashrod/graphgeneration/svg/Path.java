@@ -3,6 +3,8 @@ package com.adashrod.graphgeneration.svg;
 import com.adashrod.graphgeneration.common.OrderedPair;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -10,18 +12,17 @@ import java.util.Objects;
  * @author adashrod@gmail.com
  */
 public class Path {
-    public final String style = "stroke:#000000";//"fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1";
+    public final String style = "stroke:#000000;fill:none";//"fill-rule:evenodd;stroke:#000000;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1";
     public OrderedPair<BigDecimal> start;
     public OrderedPair<BigDecimal> end;
     public String id;
+    public List<OrderedPair<BigDecimal>> multiPartPath = new ArrayList<>();
 
     public Path() {}
 
     public Path(final BigDecimal xStart, final BigDecimal yStart, final BigDecimal xEnd, final BigDecimal yEnd) {
-        this.start.x = xStart;
-        this.start.y = yStart;
-        this.end.x = xEnd;
-        this.end.y = yEnd;
+        this.start = new OrderedPair<>(xStart, yStart);
+        this.end = new OrderedPair<>(xEnd, yEnd);
     }
 
     public Path(final OrderedPair<BigDecimal> start, final OrderedPair<BigDecimal> end) {
@@ -38,6 +39,10 @@ public class Path {
         end.x = end.x.multiply(factor).stripTrailingZeros();
         start.y = start.y.multiply(factor).stripTrailingZeros();
         end.y = end.y.multiply(factor).stripTrailingZeros();
+        multiPartPath.forEach((final OrderedPair<BigDecimal> pair) -> {
+            pair.x = pair.x.multiply(factor).stripTrailingZeros();
+            pair.y = pair.y.multiply(factor).stripTrailingZeros();
+        });
     }
 
     @Override
@@ -55,7 +60,8 @@ public class Path {
         return Objects.equals(start.x, aPath.start.x) &&
             Objects.equals(end.x, aPath.end.x) &&
             Objects.equals(start.y, aPath.start.y) &&
-            Objects.equals(end.y, aPath.end.y);
+            Objects.equals(end.y, aPath.end.y) &&
+            Objects.equals(multiPartPath, aPath.multiPartPath);
     }
 
     @Override
@@ -66,6 +72,7 @@ public class Path {
         result = prime * result + Objects.hashCode(end.x);
         result = prime * result + Objects.hashCode(start.y);
         result = prime * result + Objects.hashCode(end.y);
+        result = prime * result + Objects.hashCode(multiPartPath);
 
         return result;
     }
