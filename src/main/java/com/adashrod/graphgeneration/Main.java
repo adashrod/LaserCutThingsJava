@@ -56,7 +56,7 @@ public final class Main {
         final Maze maze = new Maze(8, 8);
         final LinearWallModel linearWallModel;
         final RectangularWallModel rectangularWallModel;
-        final SheetWallModel sheetWallModel;
+        SheetWallModel sheetWallModel;
 
         final long seed = System.currentTimeMillis();
         maze.build(new PrimsAlgorithm().setSeed(seed));
@@ -66,7 +66,23 @@ public final class Main {
         linearWallModel = new LinearWallModelGenerator(maze).generate();
         new MazePrinter(linearWallModel).printTestSvg("actualTestMaze.svg");
         rectangularWallModel = new RectangularWallModelGenerator(linearWallModel).generate();
-        sheetWallModel = new SheetWallModelGenerator(rectangularWallModel, SheetWallModelGenerator.configure().build()).generate();
-        new MazePrinter(sheetWallModel).printSvg("actualTestMazeCuts.svg");
+        sheetWallModel = new SheetWallModelGenerator(rectangularWallModel, SheetWallModelGenerator.configure()
+            .withUnit(SheetWallModelGenerator.Config.Unit.INCHES)
+            .withMaterialThickness(new BigDecimal(".118"))
+            .withHallWidth(new BigDecimal(".5"))
+            .withSeparationSpace(new BigDecimal(".05"))
+            .withWallHeight(new BigDecimal(".5"))
+            .withNotchHeight(new BigDecimal(".2"))
+            .build()).generate();
+        new MazePrinter(sheetWallModel).printSvg("actualTestMazeCutsIn.svg");
+        sheetWallModel = new SheetWallModelGenerator(rectangularWallModel, SheetWallModelGenerator.configure()
+            .withUnit(SheetWallModelGenerator.Config.Unit.MILLIMETERS)
+            .withMaterialThickness(new BigDecimal("3"))
+            .withHallWidth(new BigDecimal("15"))
+            .withSeparationSpace(new BigDecimal("2"))
+            .withWallHeight(new BigDecimal("10"))
+            .withNotchHeight(new BigDecimal("3"))
+            .build()).generate();
+        new MazePrinter(sheetWallModel).printSvg("actualTestMazeCutsMm.svg");
     }
 }

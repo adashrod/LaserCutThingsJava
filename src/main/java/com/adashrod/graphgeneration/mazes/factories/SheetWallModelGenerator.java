@@ -25,11 +25,12 @@ import static java.math.BigDecimal.ZERO;
  */
 public class SheetWallModelGenerator {
     public static final BigDecimal PPI = new BigDecimal("90.000001");
-    public static final BigDecimal DEFAULT_WALL_HEIGHT = PPI.multiply(new BigDecimal("0.5"));
-    public static final BigDecimal DEFAULT_MATERIAL_THICKNESS = PPI.multiply(new BigDecimal(".118"));
-    public static final BigDecimal DEFAULT_HALL_WIDTH = PPI.multiply(new BigDecimal("0.5"));;
-    public static final BigDecimal DEFAULT_NOTCH_HEIGHT = PPI.multiply(new BigDecimal(".118")); // 3 mm
-    public static final BigDecimal DEFAULT_SEPARATION_SPACE = PPI.multiply(new BigDecimal(".05"));;
+    public static final BigDecimal PPMM = new BigDecimal("3.5433071");
+    public static final BigDecimal DEFAULT_WALL_HEIGHT = new BigDecimal("0.5");
+    public static final BigDecimal DEFAULT_MATERIAL_THICKNESS = new BigDecimal(".118");
+    public static final BigDecimal DEFAULT_HALL_WIDTH = new BigDecimal("0.5");
+    public static final BigDecimal DEFAULT_NOTCH_HEIGHT = new BigDecimal(".118");
+    public static final BigDecimal DEFAULT_SEPARATION_SPACE = new BigDecimal(".05");
 
     private final BigDecimal wallHeight;
     private final BigDecimal materialThickness;
@@ -242,50 +243,94 @@ public class SheetWallModelGenerator {
         return new ConfigBuilder();
     }
 
-    private static class Config {
+    public static class Config {
+        // all of these values are in px, not in or cm
         private final BigDecimal wallHeight;
         private final BigDecimal materialThickness;
         private final BigDecimal hallWidth;
         private final BigDecimal notchHeight;
         private final BigDecimal separationSpace;
 
-        public Config(final BigDecimal wallHeight, final BigDecimal materialThickness, final BigDecimal hallWidth,
-                final BigDecimal notchHeight, final BigDecimal separationSpace) {
-            this.wallHeight = wallHeight;
-            this.materialThickness = materialThickness;
-            this.hallWidth = hallWidth;
-            this.notchHeight = notchHeight;
-            this.separationSpace = separationSpace;
+        public Config(final Unit unit, final BigDecimal wallHeight, final BigDecimal materialThickness,
+                final BigDecimal hallWidth, final BigDecimal notchHeight, final BigDecimal separationSpace) {
+            if (unit == Unit.INCHES) {
+                this.wallHeight = wallHeight.multiply(PPI);
+                this.materialThickness = materialThickness.multiply(PPI);
+                this.hallWidth = hallWidth.multiply(PPI);
+                this.notchHeight = notchHeight.multiply(PPI);
+                this.separationSpace = separationSpace.multiply(PPI);
+            } else {
+                this.wallHeight = wallHeight.multiply(PPMM);
+                this.materialThickness = materialThickness.multiply(PPMM);
+                this.hallWidth = hallWidth.multiply(PPMM);
+                this.notchHeight = notchHeight.multiply(PPMM);
+                this.separationSpace = separationSpace.multiply(PPMM);
+            }
+        }
+
+        public enum Unit {
+            INCHES,
+            MILLIMETERS
         }
     }
 
     public static class ConfigBuilder {
+        private Config.Unit unit = Config.Unit.INCHES;
         private BigDecimal wallHeight = DEFAULT_WALL_HEIGHT;
         private BigDecimal materialThickness = DEFAULT_MATERIAL_THICKNESS;
         private BigDecimal hallWidth = DEFAULT_HALL_WIDTH;
         private BigDecimal notchHeight = DEFAULT_NOTCH_HEIGHT;
         private BigDecimal separationSpace = DEFAULT_SEPARATION_SPACE;
 
+        /**
+         * @param unit inches or cm.
+         * @return this
+         */
+        public ConfigBuilder withUnit(final Config.Unit unit) {
+            this.unit = unit;
+            return this;
+        }
+
+        /**
+         * @param wallHeight new value in inches or centimeters
+         * @return this
+         */
         public ConfigBuilder withWallHeight(final BigDecimal wallHeight) {
             this.wallHeight = wallHeight;
             return this;
         }
 
+        /**
+         * @param materialThickness new value in inches or centimeters
+         * @return this
+         */
         public ConfigBuilder withMaterialThickness(final BigDecimal materialThickness) {
             this.materialThickness = materialThickness;
             return this;
         }
 
+        /**
+         * @param hallWidth new value in inches or centimeters
+         * @return this
+         */
         public ConfigBuilder withHallWidth(final BigDecimal hallWidth) {
             this.hallWidth = hallWidth;
             return this;
         }
 
+        /**
+         * @param notchHeight new value in inches or centimeters
+         * @return this
+         */
         public ConfigBuilder withNotchHeight(final BigDecimal notchHeight) {
             this.notchHeight = notchHeight;
             return this;
         }
 
+        /**
+         * @param separationSpace new value in inches or centimeters
+         * @return this
+         */
         public ConfigBuilder withSeparationSpace(final BigDecimal separationSpace) {
             this.separationSpace = separationSpace;
             return this;
@@ -293,6 +338,9 @@ public class SheetWallModelGenerator {
 
         public Config build() {
             final StringBuilder errors = new StringBuilder();
+            if (unit == null) {
+                errors.append("unit must not be null; ");
+            }
             if (wallHeight.compareTo(ZERO) <= 0) {
                 errors.append("wallHeight must be positive; ");
             }
@@ -312,7 +360,7 @@ public class SheetWallModelGenerator {
                 errors.delete(errors.length() - 2, errors.length());
                 throw new IllegalArgumentException(errors.toString());
             }
-            return new Config(wallHeight, materialThickness, hallWidth, notchHeight, separationSpace);
+            return new Config(unit, wallHeight, materialThickness, hallWidth, notchHeight, separationSpace);
         }
     }
 
