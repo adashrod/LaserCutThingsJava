@@ -18,12 +18,12 @@ import static com.adashrod.graphgeneration.mazes.Direction.WEST;
  * one or more ends of a wall or part of the middle.
  * @author adashrod@gmail.com
  */
-public class TopDownRectangularWallModel {
+public class RectangularWallModel {
     // todo: grid is only used for printing and by Tdrwmg to create walls; could refactor it out of here into Tdrwmg and printing into MazePrinter
     public final Space[][] grid;
     public final List<Wall> walls = new ArrayList<>();
 
-    public TopDownRectangularWallModel(final int width, final int height) {
+    public RectangularWallModel(final int width, final int height) {
         grid = new Space[height][width];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -32,7 +32,7 @@ public class TopDownRectangularWallModel {
         }
     }
 
-    public TopDownRectangularWallModel addWall(final Wall wall) {
+    public RectangularWallModel addWall(final Wall wall) {
         walls.add(wall);
         return this;
     }

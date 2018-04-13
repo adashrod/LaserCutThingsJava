@@ -3,7 +3,7 @@ package com.adashrod.graphgeneration.mazes.factories;
 import com.adashrod.graphgeneration.common.OrderedPair;
 import com.adashrod.graphgeneration.mazes.Direction;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
-import com.adashrod.graphgeneration.mazes.models.TopDownRectangularWallModel;
+import com.adashrod.graphgeneration.mazes.models.RectangularWallModel;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import static java.math.BigDecimal.ZERO;
 
 /**
  * An instance of SheetWallModelGenerator can be used to create {@link SheetWallModel}s from
- * {@link TopDownRectangularWallModel}s.
+ * {@link RectangularWallModel}s.
  * @author adashrod@gmail.com
  */
 public class SheetWallModelGenerator {
@@ -38,7 +38,7 @@ public class SheetWallModelGenerator {
     private final BigDecimal separationSpace;
 
     private final Map<SheetWallModel.Path, NotchPosInfo> notchEdgeMap = new HashMap<>();
-    private final TopDownRectangularWallModel model;
+    private final RectangularWallModel model;
 
     private static final Map<Direction, Integer> directionRank = new HashMap<>();
     static {
@@ -48,7 +48,7 @@ public class SheetWallModelGenerator {
         directionRank.put(WEST, 3);
     }
 
-    public SheetWallModelGenerator(final TopDownRectangularWallModel model, final Config config) {
+    public SheetWallModelGenerator(final RectangularWallModel model, final Config config) {
         this.model = model;
         this.wallHeight = config.wallHeight;
         this.materialThickness = config.materialThickness;
@@ -62,7 +62,7 @@ public class SheetWallModelGenerator {
 
         final BigDecimal floorWidth = calcDisplacement(model.grid[0].length);
         final OrderedPair<BigDecimal> cursor = new OrderedPair<>(floorWidth.add(separationSpace), ZERO);
-        for (final TopDownRectangularWallModel.Wall wall: model.walls) {
+        for (final RectangularWallModel.Wall wall: model.walls) {
             final BigDecimal wallLength = createNotchesForWall(wall, sheetWallModel);
 
             // the path of the wall cutout
@@ -96,7 +96,7 @@ public class SheetWallModelGenerator {
         return materialThickness.multiply(mtFactor).add(hallWidth.multiply(hwFactor));
     }
 
-    private BigDecimal createNotchesForWall(final TopDownRectangularWallModel.Wall wall, final SheetWallModel sheetWallModel) {
+    private BigDecimal createNotchesForWall(final RectangularWallModel.Wall wall, final SheetWallModel sheetWallModel) {
         // notches in the floor for the wall tabs to fit into
         final SheetWallModel.Path firstNotch = new SheetWallModel.Path(),
             secondNotch = new SheetWallModel.Path();

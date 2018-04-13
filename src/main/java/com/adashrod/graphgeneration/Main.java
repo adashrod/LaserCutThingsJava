@@ -5,11 +5,11 @@ import com.adashrod.graphgeneration.mazes.MazePrinter;
 import com.adashrod.graphgeneration.mazes.algorithms.PrimsAlgorithm;
 import com.adashrod.graphgeneration.mazes.factories.LinearWallModelGenerator;
 import com.adashrod.graphgeneration.mazes.factories.SheetWallModelGenerator;
-import com.adashrod.graphgeneration.mazes.factories.TopDownRectangularWallModelGenerator;
+import com.adashrod.graphgeneration.mazes.factories.RectangularWallModelGenerator;
 import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
 import com.adashrod.graphgeneration.mazes.models.Maze;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
-import com.adashrod.graphgeneration.mazes.models.TopDownRectangularWallModel;
+import com.adashrod.graphgeneration.mazes.models.RectangularWallModel;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -55,7 +55,7 @@ public final class Main {
     public static void main(final String... args) throws Exception {
         final Maze maze = new Maze(8, 8);
         final LinearWallModel linearWallModel;
-        final TopDownRectangularWallModel topDownRectangularWallModel;
+        final RectangularWallModel rectangularWallModel;
         final SheetWallModel sheetWallModel;
 
         final long seed = System.currentTimeMillis();
@@ -65,8 +65,8 @@ public final class Main {
         new MazePrinter(maze).printAsciiArt();
         linearWallModel = new LinearWallModelGenerator(maze).generate();
         new MazePrinter(linearWallModel).printTestSvg("actualTestMaze.svg");
-        topDownRectangularWallModel = new TopDownRectangularWallModelGenerator(linearWallModel).generate();
-        sheetWallModel = new SheetWallModelGenerator(topDownRectangularWallModel, SheetWallModelGenerator.configure().build()).generate();
+        rectangularWallModel = new RectangularWallModelGenerator(linearWallModel).generate();
+        sheetWallModel = new SheetWallModelGenerator(rectangularWallModel, SheetWallModelGenerator.configure().build()).generate();
         new MazePrinter(sheetWallModel).printSvg("actualTestMazeCuts.svg");
     }
 }

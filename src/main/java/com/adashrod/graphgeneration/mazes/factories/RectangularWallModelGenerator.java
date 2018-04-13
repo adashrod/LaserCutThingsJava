@@ -3,7 +3,7 @@ package com.adashrod.graphgeneration.mazes.factories;
 import com.adashrod.graphgeneration.common.OrderedPair;
 import com.adashrod.graphgeneration.mazes.Direction;
 import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
-import com.adashrod.graphgeneration.mazes.models.TopDownRectangularWallModel;
+import com.adashrod.graphgeneration.mazes.models.RectangularWallModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,19 +15,19 @@ import static com.adashrod.graphgeneration.mazes.Direction.WEST;
 import static com.adashrod.graphgeneration.mazes.Direction.determineDirection;
 
 /**
- * An instance of TopDownRectangularWallModelGenerator can be used to create a {@link TopDownRectangularWallModel} from
+ * An instance of RectangularWallModelGenerator can be used to create a {@link RectangularWallModel} from
  * a {@link LinearWallModel}
  * @author adashrod@gmail.com
  */
-public class TopDownRectangularWallModelGenerator {
+public class RectangularWallModelGenerator {
     private final LinearWallModel model;
 
-    public TopDownRectangularWallModelGenerator(final LinearWallModel model) {
+    public RectangularWallModelGenerator(final LinearWallModel model) {
         this.model = model;
     }
 
-    public TopDownRectangularWallModel generate() {
-        final TopDownRectangularWallModel topDownRectangularWallModel = new TopDownRectangularWallModel(2 * model.width + 1, 2 * model.height + 1);
+    public RectangularWallModel generate() {
+        final RectangularWallModel rectangularWallModel = new RectangularWallModel(2 * model.width + 1, 2 * model.height + 1);
 
         final Collection<LinearWallModel.Wall> verticalWalls = new ArrayList<>(), horizontalWalls = new ArrayList<>();
         model.walls.forEach((final LinearWallModel.Wall wall) -> {
@@ -44,17 +44,17 @@ public class TopDownRectangularWallModelGenerator {
             }
         });
         if (model.favorEwWalls) {
-            createWallSpacesFromLinearWalls(topDownRectangularWallModel, horizontalWalls, false, true);
-            createWallSpacesFromLinearWalls(topDownRectangularWallModel, verticalWalls, true, false);
+            createWallSpacesFromLinearWalls(rectangularWallModel, horizontalWalls, false, true);
+            createWallSpacesFromLinearWalls(rectangularWallModel, verticalWalls, true, false);
         } else {
-            createWallSpacesFromLinearWalls(topDownRectangularWallModel, verticalWalls, true, true);
-            createWallSpacesFromLinearWalls(topDownRectangularWallModel, horizontalWalls, false, false);
+            createWallSpacesFromLinearWalls(rectangularWallModel, verticalWalls, true, true);
+            createWallSpacesFromLinearWalls(rectangularWallModel, horizontalWalls, false, false);
         }
 
-        return topDownRectangularWallModel;
+        return rectangularWallModel;
     }
 
-    private void createWallSpacesFromLinearWalls(final TopDownRectangularWallModel topDownRectangularWallModel,
+    private void createWallSpacesFromLinearWalls(final RectangularWallModel rectangularWallModel,
             final Iterable<LinearWallModel.Wall> walls, final boolean wallsAreVertical, final boolean isFirstSetOfWalls) {
         final Direction startDirection, endDirection;
         if (wallsAreVertical) {
@@ -68,26 +68,26 @@ public class TopDownRectangularWallModelGenerator {
             int wsx = wall.start.x * 2, wex = wall.end.x * 2, wsy = wall.start.y * 2, wey = wall.end.y * 2;
             if (!isFirstSetOfWalls) {
                 if (wallsAreVertical) {
-                    if (topDownRectangularWallModel.grid[wsy][wsx].isWall) { wsy++; }
-                    if (topDownRectangularWallModel.grid[wey][wex].isWall) { wey--; }
+                    if (rectangularWallModel.grid[wsy][wsx].isWall) { wsy++; }
+                    if (rectangularWallModel.grid[wey][wex].isWall) { wey--; }
                 } else {
-                    if (topDownRectangularWallModel.grid[wsy][wsx].isWall) { wsx++; }
-                    if (topDownRectangularWallModel.grid[wey][wex].isWall) { wex--; }
+                    if (rectangularWallModel.grid[wsy][wsx].isWall) { wsx++; }
+                    if (rectangularWallModel.grid[wey][wex].isWall) { wex--; }
                 }
             }
             // todo: consider whether to have all of the following statements in the model setters or here (anemic domain model)
-            final TopDownRectangularWallModel.Wall tdrWall = new TopDownRectangularWallModel.Wall(new OrderedPair<>(wsx, wsy),
+            final RectangularWallModel.Wall tdrWall = new RectangularWallModel.Wall(new OrderedPair<>(wsx, wsy),
                 new OrderedPair<>(wex, wey), endDirection);
-            topDownRectangularWallModel.addWall(tdrWall);
-            topDownRectangularWallModel.grid[wsy][wsx].endDirections.add(startDirection);
-            topDownRectangularWallModel.grid[wey][wex].endDirections.add(endDirection);
+            rectangularWallModel.addWall(tdrWall);
+            rectangularWallModel.grid[wsy][wsx].endDirections.add(startDirection);
+            rectangularWallModel.grid[wey][wex].endDirections.add(endDirection);
             if (wallsAreVertical) {
                 for (int y = wsy; y <= wey; y++) {
-                    topDownRectangularWallModel.grid[y][wsx].isWall = true;
+                    rectangularWallModel.grid[y][wsx].isWall = true;
                 }
             } else {
                 for (int x = wsx; x <= wex; x++) {
-                    topDownRectangularWallModel.grid[wsy][x].isWall = true;
+                    rectangularWallModel.grid[wsy][x].isWall = true;
                 }
             }
         });
