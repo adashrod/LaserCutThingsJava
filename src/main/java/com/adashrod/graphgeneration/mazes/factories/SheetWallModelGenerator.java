@@ -2,8 +2,8 @@ package com.adashrod.graphgeneration.mazes.factories;
 
 import com.adashrod.graphgeneration.common.OrderedPair;
 import com.adashrod.graphgeneration.mazes.Direction;
-import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
 import com.adashrod.graphgeneration.mazes.models.RectangularWallModel;
+import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class SheetWallModelGenerator {
     public SheetWallModel generate() {
         final SheetWallModel sheetWallModel = new SheetWallModel();
 
-        final BigDecimal floorWidth = calcDisplacement(model.grid[0].length);
+        final BigDecimal floorWidth = calcDisplacement(model.width);
         final OrderedPair<BigDecimal> cursor = new OrderedPair<>(floorWidth.add(separationSpace), ZERO);
         for (final RectangularWallModel.Wall wall: model.walls) {
             final BigDecimal wallLength = createNotchesForWall(wall, sheetWallModel);
@@ -143,7 +143,7 @@ public class SheetWallModelGenerator {
      * @param notch            the Path object for the notch
      */
     private void addNotchToEdgeMap(final OrderedPair<Integer> wallEndCapCoords, final SheetWallModel.Path notch) {
-        final int lastRow = model.grid.length - 1, lastCol = model.grid[0].length - 1;
+        final int lastRow = model.height - 1, lastCol = model.width - 1;
         if (wallEndCapCoords.y.equals(0) && !wallEndCapCoords.x.equals(lastCol)) {
             notchEdgeMap.put(notch, new NotchPosInfo(NORTH, wallEndCapCoords.x.equals(0)));
         } else if (wallEndCapCoords.x.equals(lastCol) && !wallEndCapCoords.y.equals(lastRow)) {
@@ -168,52 +168,45 @@ public class SheetWallModelGenerator {
             final SheetWallModel.Path nextNotch = i < paths.size() - 1 ? paths.get(i + 1) : paths.get(0);
             final NotchPosInfo notchInfo = notchEdgeMap.get(notch), nextNotchInfo = notchEdgeMap.get(nextNotch);
             if (notchInfo.direction == nextNotchInfo.direction || nextNotchInfo.isCorner) {
-                final OrderedPair<BigDecimal> firstPoint, secondPoint;
-                if (notchInfo.direction == NORTH) {
-                    firstPoint = notch.points.get(1);
-                    secondPoint = nextNotch.points.get(0);
-                } else if (notchInfo.direction == EAST) {
-                    firstPoint = notch.points.get(2);
-                    secondPoint = nextNotch.points.get(1);
-                } else if (notchInfo.direction == SOUTH) {
-                    firstPoint = notch.points.get(3);
-                    secondPoint = nextNotch.points.get(2);
-                } else if (notchInfo.direction == WEST) {
-                    firstPoint = notch.points.get(0);
-                    secondPoint = nextNotch.points.get(3);
-                } else {
-                    throw new IllegalStateException("notch is not in edge map, but is on edge");
-                }
+                final NotchConnection points = findNotchConnectionPoints(notchInfo, notch, nextNotch, false);
+                final OrderedPair<BigDecimal> firstPoint = points.firstPoint, secondPoint = points.secondPoint;
                 if (!firstPoint.equals(secondPoint)) {
                     sheetWallModel.floorOutline.addPath(new SheetWallModel.Path(firstPoint, secondPoint).setClosed(false));
                 } else {
                     System.out.println("DEBUG: skipping connecting floor outer path because it's length 0: " + firstPoint.toString());
                 }
             } else { // notches are on different sides and neither is a corner (unusual case of both parts of a corner of the maze being open)
-                final OrderedPair<BigDecimal> firstPoint, floorCornerPoint, secondPoint;
-                if (notchInfo.direction == NORTH) {
-                    firstPoint = notch.points.get(1);
-                    secondPoint = nextNotch.points.get(1);
-                    floorCornerPoint = new OrderedPair<>(secondPoint.x, firstPoint.y);
-                } else if (notchInfo.direction == EAST) {
-                    firstPoint = notch.points.get(2);
-                    secondPoint = nextNotch.points.get(2);
-                    floorCornerPoint = new OrderedPair<>(firstPoint.x, secondPoint.y);
-                } else if (notchInfo.direction == SOUTH) {
-                    firstPoint = notch.points.get(3);
-                    secondPoint = nextNotch.points.get(3);
-                    floorCornerPoint = new OrderedPair<>(secondPoint.x, firstPoint.y);
-                } else if (notchInfo.direction == WEST) {
-                    firstPoint = notch.points.get(0);
-                    secondPoint = nextNotch.points.get(0);
-                    floorCornerPoint = new OrderedPair<>(firstPoint.x, secondPoint.y);
-                } else {
-                    throw new IllegalStateException("notch is not in edge map, but is on edge");
-                }
-                sheetWallModel.floorOutline.addPath(new SheetWallModel.Path(firstPoint, floorCornerPoint).setClosed(false));
-                sheetWallModel.floorOutline.addPath(new SheetWallModel.Path(floorCornerPoint, secondPoint).setClosed(false));
+                final NotchConnection points = findNotchConnectionPoints(notchInfo, notch, nextNotch, true);
+                sheetWallModel.floorOutline.addPath(new SheetWallModel.Path(points.firstPoint, points.cornerPoint).setClosed(false));
+                sheetWallModel.floorOutline.addPath(new SheetWallModel.Path(points.cornerPoint, points.secondPoint).setClosed(false));
             }
         }
+    }
+
+    private NotchConnection findNotchConnectionPoints(final NotchPosInfo notchInfo,
+            final SheetWallModel.Path notch, final SheetWallModel.Path nextNotch, final boolean includeCorner) {
+        final int nextNotchAdditive = includeCorner ? 1 : 0;
+        final OrderedPair<BigDecimal> firstPoint, floorCornerPoint, secondPoint;
+        if (notchInfo.direction == NORTH) {
+            firstPoint = notch.points.get(1);
+            secondPoint = nextNotch.points.get(nextNotchAdditive);
+            floorCornerPoint = new OrderedPair<>(secondPoint.x, firstPoint.y);
+        } else if (notchInfo.direction == EAST) {
+            firstPoint = notch.points.get(2);
+            secondPoint = nextNotch.points.get(1 + nextNotchAdditive);
+            floorCornerPoint = new OrderedPair<>(firstPoint.x, secondPoint.y);
+        } else if (notchInfo.direction == SOUTH) {
+            firstPoint = notch.points.get(3);
+            secondPoint = nextNotch.points.get(2 + nextNotchAdditive);
+            floorCornerPoint = new OrderedPair<>(secondPoint.x, firstPoint.y);
+        } else if (notchInfo.direction == WEST) {
+            firstPoint = notch.points.get(0);
+            secondPoint = nextNotch.points.get(3 + nextNotchAdditive % 4);
+            floorCornerPoint = new OrderedPair<>(firstPoint.x, secondPoint.y);
+        } else {
+            throw new IllegalStateException("notch is not in edge map, but is on edge");
+        }
+        return new NotchConnection(firstPoint, floorCornerPoint, secondPoint);
     }
 
     /**
@@ -330,6 +323,19 @@ public class SheetWallModelGenerator {
         private NotchPosInfo(final Direction direction, final boolean isCorner) {
             this.direction = direction;
             this.isCorner = isCorner;
+        }
+    }
+
+    private static final class NotchConnection {
+        private final OrderedPair<BigDecimal> firstPoint;
+        private final OrderedPair<BigDecimal> cornerPoint;
+        private final OrderedPair<BigDecimal> secondPoint;
+
+        private NotchConnection(final OrderedPair<BigDecimal> firstPoint, final OrderedPair<BigDecimal> cornerPoint,
+                final OrderedPair<BigDecimal> secondPoint) {
+            this.firstPoint = firstPoint;
+            this.cornerPoint = cornerPoint;
+            this.secondPoint = secondPoint;
         }
     }
 }

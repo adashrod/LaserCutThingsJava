@@ -136,12 +136,7 @@ public class CuttingBoard {
     private Collection<Path> makeCmPaths(final Rect rect, final BigDecimal xOffset, final BigDecimal yOffset,
             final Side side) {
         final Collection<Path> newPaths = new ArrayList<>();
-        final OrderedPair<Integer> rectPos = rectanglePositions.get(rect);
-        if (config.printAllCmHashes ||
-               (side == TOP &&    (rectPos.y == 0 ||                    rectPos.y == config.numCmRows / 2) ||
-                side == RIGHT &&  (rectPos.x == config.numCmCols - 1 || rectPos.x == config.numCmCols / 2 - 1) ||
-                side == BOTTOM && (rectPos.y == config.numCmRows - 1 || rectPos.y == config.numCmRows / 2 - 1) ||
-                side == LEFT &&   (rectPos.x == 0 ||                    rectPos.x == config.numCmCols / 2))) {
+        if (shouldPrintCmHashes(side, rectanglePositions.get(rect))) {
             newPaths.add(makePath(rect, "half", xOffset, yOffset, cmHalfPixelSize, cmTenthPixelSize, 1, side));
             for (final int i: new int[]{1, 2, 3, 4, 6, 7, 8, 9}) { // all mm marks except half-cm
                 newPaths.add(makePath(rect, "mm", xOffset, yOffset, cmTenthPixelSize, cmTwentiethPixelSize, i,
@@ -149,6 +144,27 @@ public class CuttingBoard {
             }
         }
         return newPaths;
+    }
+
+    private boolean shouldPrintCmHashes(final Side side, final OrderedPair<Integer> rectPos) {
+        return config.printAllCmHashes ||
+            shouldPrintTopCmHashes(side, rectPos) ||
+            shouldPrintRightCmHashes(side, rectPos) ||
+            shouldPrintBottomCmHashes(side, rectPos) ||
+            shouldPrintLeftCmHashes(side, rectPos);
+    }
+
+    private boolean shouldPrintTopCmHashes(final Side side, final OrderedPair<Integer> rectPos) {
+        return side == TOP &&    rectPos.y == 0 ||                    rectPos.y == config.numCmRows / 2;
+    }
+    private boolean shouldPrintRightCmHashes(final Side side, final OrderedPair<Integer> rectPos) {
+        return side == RIGHT &&  rectPos.x == config.numCmCols - 1 || rectPos.x == config.numCmCols / 2 - 1;
+    }
+    private boolean shouldPrintBottomCmHashes(final Side side, final OrderedPair<Integer> rectPos) {
+        return side == BOTTOM && rectPos.y == config.numCmRows - 1 || rectPos.y == config.numCmRows / 2 - 1;
+    }
+    private boolean shouldPrintLeftCmHashes(final Side side, final OrderedPair<Integer> rectPos) {
+        return side == LEFT &&   rectPos.x == 0 ||                    rectPos.x == config.numCmCols / 2;
     }
 
     private Path makePath(final Rect rect, final String hashMarkName, final BigDecimal xOffset, final BigDecimal yOffset,

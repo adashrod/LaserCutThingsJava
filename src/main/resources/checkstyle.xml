@@ -40,7 +40,7 @@
 
         <module name="CovariantEquals"/>
         <module name="CyclomaticComplexity">
-            <property name="max" value="15"/>
+            <property name="max" value="10"/>
         </module>
         <module name="EmptyBlock"/>
         <module name="EmptyCatchBlock">

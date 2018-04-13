@@ -90,27 +90,7 @@ public class MazePrinter {
         final PrintStream o = printStream != null ? printStream : System.out;
         printAsciiArtHelperFirstRow(o);
         for (int y = 0; y < maze.getNumRows(); y++) {
-            // pre-phase: print left wall or opening at start of row
-            o.print(maze.getGrid()[y][0].westOpen ? " " : "|");
-
-            for (int x = 0; x < maze.getNumCols(); x++) {
-                final Space s = maze.getGrid()[y][x];
-                final boolean rightWall = x + 1 == maze.getNumCols();
-
-                // phase 1: the space itself
-                o.print(s.southOpen ? " " : "_");
-                // phase 2: the wall to the right of the space (interstitial)
-                final Space next = rightWall ? null : maze.getGrid()[y][x + 1];
-                final boolean nextSouthOpen = next == null || next.southOpen;
-                if (!s.eastOpen) {
-                    o.print("|");
-                } else if (s.southOpen && nextSouthOpen) {
-                    o.print(" ");
-                } else {
-                    o.print("_");
-                }
-            }
-            o.println();
+            printAsciiArtHelperRow(o, y);
         }
     }
 
@@ -122,6 +102,30 @@ public class MazePrinter {
             final Space next = x + 1 < maze.getNumCols() ? maze.getGrid()[0][x + 1] : null;
             final boolean nextNorthOpen = next == null || next.northOpen;
             o.print(space.northOpen && nextNorthOpen ? " " : "_");
+        }
+        o.println();
+    }
+
+    private void printAsciiArtHelperRow(final PrintStream o, final int y) {
+        // pre-phase: print left wall or opening at start of row
+        o.print(maze.getGrid()[y][0].westOpen ? " " : "|");
+
+        for (int x = 0; x < maze.getNumCols(); x++) {
+            final Space s = maze.getGrid()[y][x];
+            final boolean rightWall = x + 1 == maze.getNumCols();
+
+            // phase 1: the space itself
+            o.print(s.southOpen ? " " : "_");
+            // phase 2: the wall to the right of the space (interstitial)
+            final Space next = rightWall ? null : maze.getGrid()[y][x + 1];
+            final boolean nextSouthOpen = next == null || next.southOpen;
+            if (!s.eastOpen) {
+                o.print("|");
+            } else if (s.southOpen && nextSouthOpen) {
+                o.print(" ");
+            } else {
+                o.print("_");
+            }
         }
         o.println();
     }

@@ -21,9 +21,16 @@ import static com.adashrod.graphgeneration.mazes.Direction.determineDirection;
  */
 public class RectangularWallModelGenerator {
     private final LinearWallModel model;
+    private final Space[][] grid;
 
     public RectangularWallModelGenerator(final LinearWallModel model) {
         this.model = model;
+        grid = new Space[2 * model.width + 1][2 * model.height + 1];
+        for (int y = 0; y < grid.length; y++) {
+            for (int x = 0; x < grid[0].length; x++) {
+                grid[y][x] = new Space();
+            }
+        }
     }
 
     public RectangularWallModel generate() {
@@ -56,40 +63,46 @@ public class RectangularWallModelGenerator {
 
     private void createWallSpacesFromLinearWalls(final RectangularWallModel rectangularWallModel,
             final Iterable<LinearWallModel.Wall> walls, final boolean wallsAreVertical, final boolean isFirstSetOfWalls) {
-        final Direction startDirection, endDirection;
-        if (wallsAreVertical) {
-            startDirection = NORTH;
-            endDirection = SOUTH;
-        } else {
-            startDirection = WEST;
-            endDirection = EAST;
-        }
+        final Direction endDirection = wallsAreVertical ? SOUTH : EAST;
         walls.forEach((final LinearWallModel.Wall wall) -> {
             int wsx = wall.start.x * 2, wex = wall.end.x * 2, wsy = wall.start.y * 2, wey = wall.end.y * 2;
             if (!isFirstSetOfWalls) {
                 if (wallsAreVertical) {
-                    if (rectangularWallModel.grid[wsy][wsx].isWall) { wsy++; }
-                    if (rectangularWallModel.grid[wey][wex].isWall) { wey--; }
+                    if (grid[wsy][wsx].isWall) { wsy++; }
+                    if (grid[wey][wex].isWall) { wey--; }
                 } else {
-                    if (rectangularWallModel.grid[wsy][wsx].isWall) { wsx++; }
-                    if (rectangularWallModel.grid[wey][wex].isWall) { wex--; }
+                    if (grid[wsy][wsx].isWall) { wsx++; }
+                    if (grid[wey][wex].isWall) { wex--; }
                 }
             }
-            // todo: consider whether to have all of the following statements in the model setters or here (anemic domain model)
-            final RectangularWallModel.Wall tdrWall = new RectangularWallModel.Wall(new OrderedPair<>(wsx, wsy),
+            final RectangularWallModel.Wall rectWall = new RectangularWallModel.Wall(new OrderedPair<>(wsx, wsy),
                 new OrderedPair<>(wex, wey), endDirection);
-            rectangularWallModel.addWall(tdrWall);
-            rectangularWallModel.grid[wsy][wsx].endDirections.add(startDirection);
-            rectangularWallModel.grid[wey][wex].endDirections.add(endDirection);
-            if (wallsAreVertical) {
-                for (int y = wsy; y <= wey; y++) {
-                    rectangularWallModel.grid[y][wsx].isWall = true;
-                }
-            } else {
-                for (int x = wsx; x <= wex; x++) {
-                    rectangularWallModel.grid[wsy][x].isWall = true;
-                }
-            }
+            rectangularWallModel.addWall(rectWall);
+            fillOutWallSpaces(wallsAreVertical, wsx, wsy, wex, wey);
         });
+    }
+
+    private void fillOutWallSpaces(final boolean wallsAreVertical, final int wsx, final int wsy, final int wex,
+            final int wey) {
+        if (wallsAreVertical) {
+            for (int y = wsy; y <= wey; y++) {
+                grid[y][wsx].isWall = true;
+            }
+        } else {
+            for (int x = wsx; x <= wex; x++) {
+                grid[wsy][x].isWall = true;
+            }
+        }
+
+    }
+
+    private static class Space {
+        public boolean isWall;
+        public final Collection<Direction> endDirections = new ArrayList<>(); // todo: get rid of direct access
+
+        @Override
+        public String toString() {
+            return String.format("Space[%s,%s]", isWall ? "#" : " ", endDirections.isEmpty() ? "" : endDirections);
+        }
     }
 }
