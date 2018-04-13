@@ -25,8 +25,12 @@ public class SvgElementGenerator {
         final StringBuilder dAttrBuilder = new StringBuilder();
         dAttrBuilder.append("M");
         if (path.multiPartPath.isEmpty()) {
-            dAttrBuilder.append(" ").append(path.start.x.round(mc).stripTrailingZeros()).append(",")
-                .append(path.start.y.round(mc).stripTrailingZeros());
+            dAttrBuilder.append(" ")
+                .append(path.start.x.round(mc).stripTrailingZeros()).append(",")
+                .append(path.start.y.round(mc).stripTrailingZeros())
+                .append(" ")
+                .append(path.end.x.round(mc).stripTrailingZeros()).append(",")
+                .append(path.end.y.round(mc).stripTrailingZeros());
         } else {
             path.multiPartPath.forEach((final OrderedPair<BigDecimal> point) -> {
                 dAttrBuilder.append(" ").append(point.x.round(mc).stripTrailingZeros()).append(",")
@@ -36,6 +40,6 @@ public class SvgElementGenerator {
                 dAttrBuilder.append(" Z"); // closed path
             }
         }
-        return String.format("<path style=\"%s\" d=\"%s\" id=\"%s\"/>", path.style, dAttrBuilder.toString(), path.id);
+        return String.format("<path style=\"%s\" d=\"%s\" id=\"%s\"/>", path.style, dAttrBuilder.toString(), path.id != null ? path.id : "");
     }
 }
