@@ -10,8 +10,8 @@ public class OrderedPair<T extends Number> {
     public T x, y;
 
     public OrderedPair(final T x, final T y) {
-        this.x = x;
-        this.y = y;
+        this.x = Objects.requireNonNull(x, "x can't be null");
+        this.y = Objects.requireNonNull(y, "y can't be null");
     }
 
     @Override
