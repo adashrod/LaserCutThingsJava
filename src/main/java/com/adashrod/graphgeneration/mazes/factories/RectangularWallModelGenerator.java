@@ -25,7 +25,7 @@ public class RectangularWallModelGenerator {
 
     public RectangularWallModelGenerator(final LinearWallModel model) {
         this.model = model;
-        grid = new Space[2 * model.width + 1][2 * model.height + 1];
+        grid = new Space[2 * model.height + 1][2 * model.width + 1];
         for (int y = 0; y < grid.length; y++) {
             for (int x = 0; x < grid[0].length; x++) {
                 grid[y][x] = new Space();
