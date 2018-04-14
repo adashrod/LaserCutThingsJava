@@ -2,6 +2,7 @@ package com.adashrod.graphgeneration.mazes;
 
 import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
 import com.adashrod.graphgeneration.mazes.models.Maze;
+import com.adashrod.graphgeneration.mazes.models.Shape;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
 import com.adashrod.graphgeneration.svg.Path;
 import com.adashrod.graphgeneration.svg.SvgElementGenerator;
@@ -196,12 +197,12 @@ public class MazePrinter {
             final SvgElementGenerator svgElementGenerator = new SvgElementGenerator();
 
             fileWriter.append("<g id=\"floor\">");
-            for (final SheetWallModel.Path notch: sheetWallModel.floorNotches.paths) {
+            for (final com.adashrod.graphgeneration.mazes.models.Path notch: sheetWallModel.floorNotches.paths) {
                 final Path svgPath = svgElementGenerator.sheetPathToSvgPath(notch);
                 fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
             }
 
-            for (final SheetWallModel.Path outlinePath: sheetWallModel.floorOutline.paths) {
+            for (final com.adashrod.graphgeneration.mazes.models.Path outlinePath: sheetWallModel.floorOutline.paths) {
                 final Path svgPath = svgElementGenerator.sheetPathToSvgPath(outlinePath);
                 svgPath.style = svgPath.style.replace("#000000", "#ff0000");
                 fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
@@ -209,8 +210,8 @@ public class MazePrinter {
             fileWriter.append("</g>\n");
 
             fileWriter.append("<g id=\"walls\">");
-            for (final SheetWallModel.Shape shape: sheetWallModel.walls) {
-                for (final SheetWallModel.Path wall: shape.paths) {
+            for (final Shape shape: sheetWallModel.walls) {
+                for (final com.adashrod.graphgeneration.mazes.models.Path wall: shape.paths) {
                     final Path svgPath = svgElementGenerator.sheetPathToSvgPath(wall);
                     fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
                 }

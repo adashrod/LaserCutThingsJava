@@ -1,6 +1,7 @@
 package com.adashrod.graphgeneration.mazes.factories;
 
 import com.adashrod.graphgeneration.common.OrderedPair;
+import com.adashrod.graphgeneration.mazes.models.Shape;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
 
 import java.math.BigDecimal;
@@ -36,17 +37,17 @@ class SheetWallTilingOptimizer {
             floorHeight = sheetWallModel.floorOutline.findHeight(),
             wallHeight = sheetWallModel.walls.get(0).findHeight();
         cursor = new OrderedPair<>(ZERO, floorHeight);
-        final List<SheetWallModel.Shape> sortedWalls = new ArrayList<>(sheetWallModel.walls);
+        final List<Shape> sortedWalls = new ArrayList<>(sheetWallModel.walls);
         sheetWallModel.walls.clear();
-        sortedWalls.sort(Comparator.comparing(SheetWallModel.Shape::findWidth).reversed());
-        final Deque<SheetWallModel.Shape> shapesDeque = new LinkedList<>(sortedWalls);
+        sortedWalls.sort(Comparator.comparing(Shape::findWidth).reversed());
+        final Deque<Shape> shapesDeque = new LinkedList<>(sortedWalls);
         beginningOfLineX = ZERO;
         currentMaxRowWidth = floorWidth;
         cursor.y = sheetWallModel.floorOutline.findHeight().add(separationSpace);
         while (!shapesDeque.isEmpty()) {
             if (fitsInNewRow(wallHeight)) {
                 // add to new row in current column
-                final SheetWallModel.Shape longWall = shapesDeque.pollFirst();
+                final Shape longWall = shapesDeque.pollFirst();
                 addToCurrentRow(longWall);
                 // so that we don't overwrite cmrw when it's already been set to the floor width on the first iteration
                 if (currentMaxRowWidth == null) {
@@ -63,7 +64,7 @@ class SheetWallTilingOptimizer {
                 continue;
             }
             while (!shapesDeque.isEmpty()) {
-                final SheetWallModel.Shape shortWall = shapesDeque.peekLast();
+                final Shape shortWall = shapesDeque.peekLast();
                 if (fitsInCurrentRow(shortWall)) {
                     addToCurrentRow(shapesDeque.pollLast());
                 } else {
@@ -74,7 +75,7 @@ class SheetWallTilingOptimizer {
         }
     }
 
-    private void addToCurrentRow(final SheetWallModel.Shape wall) {
+    private void addToCurrentRow(final Shape wall) {
         wall.translate(cursor);
         sheetWallModel.walls.add(wall);
         cursor.x = cursor.x.add(wall.findWidth()).add(separationSpace);
@@ -84,7 +85,7 @@ class SheetWallTilingOptimizer {
         return cursor.y.add(wallHeight).compareTo(maxHeight) <= 0;
     }
 
-    private boolean fitsInCurrentRow(final SheetWallModel.Shape wall) {
+    private boolean fitsInCurrentRow(final Shape wall) {
         return cursor.x.subtract(beginningOfLineX).add(wall.findWidth()).compareTo(currentMaxRowWidth) <= 0;
     }
 }

@@ -2,7 +2,9 @@ package com.adashrod.graphgeneration.mazes.factories;
 
 import com.adashrod.graphgeneration.common.OrderedPair;
 import com.adashrod.graphgeneration.mazes.Direction;
+import com.adashrod.graphgeneration.mazes.models.Path;
 import com.adashrod.graphgeneration.mazes.models.RectangularWallModel;
+import com.adashrod.graphgeneration.mazes.models.Shape;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
 
 import java.math.BigDecimal;
@@ -42,7 +44,7 @@ public class SheetWallModelGenerator {
     private final BigDecimal maxWidth;
     private final BigDecimal maxHeight;
 
-    private final Map<SheetWallModel.Path, NotchPosInfo> notchEdgeMap = new HashMap<>();
+    private final Map<Path, NotchPosInfo> notchEdgeMap = new HashMap<>();
     private final RectangularWallModel model;
 
     private static final Map<Direction, Integer> directionRank = new HashMap<>();
@@ -69,7 +71,7 @@ public class SheetWallModelGenerator {
 
         // for now, all walls and the floor will be positioned at (0,0). They'll be translated and tiled on the
         // print sheet later
-        model.walls.stream().map(wall -> createNotchesForWall(wall, sheetWallModel)).map(wallLength -> new SheetWallModel.Path()
+        model.walls.stream().map(wall -> createNotchesForWall(wall, sheetWallModel)).map(wallLength -> new Path()
             .addPoint(new OrderedPair<>(ZERO, ZERO))
             .addPoint(new OrderedPair<>(wallLength, ZERO))
             .addPoint(new OrderedPair<>(wallLength, wallHeight.add(materialThickness)))
@@ -77,7 +79,7 @@ public class SheetWallModelGenerator {
             .addPoint(new OrderedPair<>(wallLength.subtract(notchHeight), wallHeight))
             .addPoint(new OrderedPair<>(notchHeight, wallHeight))
             .addPoint(new OrderedPair<>(notchHeight, wallHeight.add(materialThickness)))
-            .addPoint(new OrderedPair<>(ZERO, wallHeight.add(materialThickness)))).forEach(wallPath -> sheetWallModel.addShape(new SheetWallModel.Shape(wallPath)));
+            .addPoint(new OrderedPair<>(ZERO, wallHeight.add(materialThickness)))).forEach(wallPath -> sheetWallModel.addShape(new Shape(wallPath)));
         createOutline(sheetWallModel);
         new SheetWallTilingOptimizer(sheetWallModel, separationSpace, maxWidth, maxHeight).optimize();
         return sheetWallModel;
@@ -98,8 +100,8 @@ public class SheetWallModelGenerator {
 
     private BigDecimal createNotchesForWall(final RectangularWallModel.Wall wall, final SheetWallModel sheetWallModel) {
         // notches in the floor for the wall tabs to fit into
-        final SheetWallModel.Path firstNotch = new SheetWallModel.Path(),
-            secondNotch = new SheetWallModel.Path();
+        final Path firstNotch = new Path(),
+            secondNotch = new Path();
         final BigDecimal wallLength;
         if (wall.getWallDirection() == EAST) {
             wallLength = calcDisplacement(wall.end.x + 1)
@@ -142,7 +144,7 @@ public class SheetWallModelGenerator {
      * @param wallEndCapCoords the grid-based coordinates of the notch
      * @param notch            the Path object for the notch
      */
-    private void addNotchToEdgeMap(final OrderedPair<Integer> wallEndCapCoords, final SheetWallModel.Path notch) {
+    private void addNotchToEdgeMap(final OrderedPair<Integer> wallEndCapCoords, final Path notch) {
         final int lastRow = model.height - 1, lastCol = model.width - 1;
         if (wallEndCapCoords.y.equals(0) && !wallEndCapCoords.x.equals(lastCol)) {
             notchEdgeMap.put(notch, new NotchPosInfo(NORTH, wallEndCapCoords.x.equals(0)));
@@ -161,30 +163,30 @@ public class SheetWallModelGenerator {
      * @param sheetWallModel model to add paths to
      */
     private void createOutline(final SheetWallModel sheetWallModel) {
-        final List<SheetWallModel.Path> paths = new ArrayList<>(notchEdgeMap.keySet());
+        final List<Path> paths = new ArrayList<>(notchEdgeMap.keySet());
         paths.sort(edgeNotchComparator);
         for (int i = 0; i < paths.size(); i++) {
-            final SheetWallModel.Path notch = paths.get(i);
-            final SheetWallModel.Path nextNotch = i < paths.size() - 1 ? paths.get(i + 1) : paths.get(0);
+            final Path notch = paths.get(i);
+            final Path nextNotch = i < paths.size() - 1 ? paths.get(i + 1) : paths.get(0);
             final NotchPosInfo notchInfo = notchEdgeMap.get(notch), nextNotchInfo = notchEdgeMap.get(nextNotch);
             if (notchInfo.direction == nextNotchInfo.direction || nextNotchInfo.isCorner) {
                 final NotchConnection points = findNotchConnectionPoints(notchInfo, notch, nextNotch, false);
                 final OrderedPair<BigDecimal> firstPoint = points.firstPoint, secondPoint = points.secondPoint;
                 if (!firstPoint.equals(secondPoint)) {
-                    sheetWallModel.floorOutline.addPath(new SheetWallModel.Path(firstPoint, secondPoint).setClosed(false));
+                    sheetWallModel.floorOutline.addPath(new Path(firstPoint, secondPoint).setClosed(false));
                 } else {
                     System.out.println("DEBUG: skipping connecting floor outer path because it's length 0: " + firstPoint.toString());
                 }
             } else { // notches are on different sides and neither is a corner (unusual case of both parts of a corner of the maze being open)
                 final NotchConnection points = findNotchConnectionPoints(notchInfo, notch, nextNotch, true);
-                sheetWallModel.floorOutline.addPath(new SheetWallModel.Path(points.firstPoint, points.cornerPoint).setClosed(false));
-                sheetWallModel.floorOutline.addPath(new SheetWallModel.Path(points.cornerPoint, points.secondPoint).setClosed(false));
+                sheetWallModel.floorOutline.addPath(new Path(points.firstPoint, points.cornerPoint).setClosed(false));
+                sheetWallModel.floorOutline.addPath(new Path(points.cornerPoint, points.secondPoint).setClosed(false));
             }
         }
     }
 
     private NotchConnection findNotchConnectionPoints(final NotchPosInfo notchInfo,
-            final SheetWallModel.Path notch, final SheetWallModel.Path nextNotch, final boolean includeCorner) {
+            final Path notch, final Path nextNotch, final boolean includeCorner) {
         final int nextNotchAdditive = includeCorner ? 1 : 0;
         final OrderedPair<BigDecimal> firstPoint, floorCornerPoint, secondPoint;
         if (notchInfo.direction == NORTH) {
@@ -218,7 +220,7 @@ public class SheetWallModelGenerator {
      * B  6
      * A987
      */
-    private final Comparator<SheetWallModel.Path> edgeNotchComparator = (final SheetWallModel.Path p1, final SheetWallModel.Path p2) -> {
+    private final Comparator<Path> edgeNotchComparator = (final Path p1, final Path p2) -> {
         final Direction p1Dir = notchEdgeMap.get(p1).direction, p2Dir = notchEdgeMap.get(p2).direction;
         final int dirCmp = Integer.compare(directionRank.get(p1Dir), directionRank.get(p2Dir));
         if (dirCmp != 0) {
