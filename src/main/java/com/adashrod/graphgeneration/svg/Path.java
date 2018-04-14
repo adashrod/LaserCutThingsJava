@@ -12,7 +12,7 @@ import java.util.Objects;
  * @author adashrod@gmail.com
  */
 public class Path {
-    public final String style = "stroke:#000000;fill:none";//"fill-rule:evenodd;stroke:#000000;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1";
+    public String style = "stroke:#000000;fill:none";//"fill-rule:evenodd;stroke:#000000;stroke-width:2px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1";
     public OrderedPair<BigDecimal> start;
     public OrderedPair<BigDecimal> end;
     public String id;

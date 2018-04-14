@@ -203,6 +203,7 @@ public class MazePrinter {
 
             for (final SheetWallModel.Path outlinePath: sheetWallModel.floorOutline.paths) {
                 final Path svgPath = svgElementGenerator.sheetPathToSvgPath(outlinePath);
+                svgPath.style = svgPath.style.replace("#000000", "#ff0000");
                 fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
             }
             fileWriter.append("</g>\n");
