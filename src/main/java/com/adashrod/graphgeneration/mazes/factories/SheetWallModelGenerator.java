@@ -31,12 +31,16 @@ public class SheetWallModelGenerator {
     public static final BigDecimal DEFAULT_HALL_WIDTH = new BigDecimal("0.5");
     public static final BigDecimal DEFAULT_NOTCH_HEIGHT = new BigDecimal(".118");
     public static final BigDecimal DEFAULT_SEPARATION_SPACE = new BigDecimal(".05");
+    public static final BigDecimal DEFAULT_MAX_WIDTH = new BigDecimal("19.5");
+    public static final BigDecimal DEFAULT_MAX_HEIGHT = new BigDecimal("11");
 
     private final BigDecimal wallHeight;
     private final BigDecimal materialThickness;
     private final BigDecimal hallWidth;
     private final BigDecimal notchHeight;
     private final BigDecimal separationSpace;
+    private final BigDecimal maxWidth;
+    private final BigDecimal maxHeight;
 
     private final Map<SheetWallModel.Path, NotchPosInfo> notchEdgeMap = new HashMap<>();
     private final RectangularWallModel model;
@@ -56,31 +60,26 @@ public class SheetWallModelGenerator {
         this.hallWidth = config.hallWidth;
         this.notchHeight = config.notchHeight;
         this.separationSpace = config.separationSpace;
+        this.maxWidth = config.maxWidth;
+        this.maxHeight = config.maxHeight;
     }
 
     public SheetWallModel generate() {
         final SheetWallModel sheetWallModel = new SheetWallModel();
 
-        final BigDecimal floorWidth = calcDisplacement(model.width);
-        final OrderedPair<BigDecimal> cursor = new OrderedPair<>(floorWidth.add(separationSpace), ZERO);
-        for (final RectangularWallModel.Wall wall: model.walls) {
-            final BigDecimal wallLength = createNotchesForWall(wall, sheetWallModel);
-
-            // the path of the wall cutout
-            final SheetWallModel.Path wallPath = new SheetWallModel.Path()
-                .addPoint(new OrderedPair<>(ZERO, ZERO))
-                .addPoint(new OrderedPair<>(wallLength, ZERO))
-                .addPoint(new OrderedPair<>(wallLength, wallHeight.add(materialThickness)))
-                .addPoint(new OrderedPair<>(wallLength.subtract(notchHeight), wallHeight.add(materialThickness)))
-                .addPoint(new OrderedPair<>(wallLength.subtract(notchHeight), wallHeight))
-                .addPoint(new OrderedPair<>(notchHeight, wallHeight))
-                .addPoint(new OrderedPair<>(notchHeight, wallHeight.add(materialThickness)))
-                .addPoint(new OrderedPair<>(ZERO, wallHeight.add(materialThickness)))
-                .translate(cursor);
-            sheetWallModel.addShape(new SheetWallModel.Shape(wallPath));
-            cursor.y = cursor.y.add(wallPath.findHeight()).add(separationSpace);
-        }
+        // for now, all walls and the floor will be positioned at (0,0). They'll be translated and tiled on the
+        // print sheet later
+        model.walls.stream().map(wall -> createNotchesForWall(wall, sheetWallModel)).map(wallLength -> new SheetWallModel.Path()
+            .addPoint(new OrderedPair<>(ZERO, ZERO))
+            .addPoint(new OrderedPair<>(wallLength, ZERO))
+            .addPoint(new OrderedPair<>(wallLength, wallHeight.add(materialThickness)))
+            .addPoint(new OrderedPair<>(wallLength.subtract(notchHeight), wallHeight.add(materialThickness)))
+            .addPoint(new OrderedPair<>(wallLength.subtract(notchHeight), wallHeight))
+            .addPoint(new OrderedPair<>(notchHeight, wallHeight))
+            .addPoint(new OrderedPair<>(notchHeight, wallHeight.add(materialThickness)))
+            .addPoint(new OrderedPair<>(ZERO, wallHeight.add(materialThickness)))).forEach(wallPath -> sheetWallModel.addShape(new SheetWallModel.Shape(wallPath)));
         createOutline(sheetWallModel);
+        new SheetWallTilingOptimizer(sheetWallModel, separationSpace, maxWidth, maxHeight).optimize();
         return sheetWallModel;
     }
 
@@ -250,21 +249,28 @@ public class SheetWallModelGenerator {
         private final BigDecimal hallWidth;
         private final BigDecimal notchHeight;
         private final BigDecimal separationSpace;
+        private final BigDecimal maxWidth;
+        private final BigDecimal maxHeight;
 
         public Config(final Unit unit, final BigDecimal wallHeight, final BigDecimal materialThickness,
-                final BigDecimal hallWidth, final BigDecimal notchHeight, final BigDecimal separationSpace) {
+                final BigDecimal hallWidth, final BigDecimal notchHeight, final BigDecimal separationSpace,
+                final BigDecimal maxWidth, final BigDecimal maxHeight) {
             if (unit == Unit.INCHES) {
                 this.wallHeight = wallHeight.multiply(PPI);
                 this.materialThickness = materialThickness.multiply(PPI);
                 this.hallWidth = hallWidth.multiply(PPI);
                 this.notchHeight = notchHeight.multiply(PPI);
                 this.separationSpace = separationSpace.multiply(PPI);
+                this.maxWidth = maxWidth.multiply(PPI);
+                this.maxHeight = maxHeight.multiply(PPI);
             } else {
                 this.wallHeight = wallHeight.multiply(PPMM);
                 this.materialThickness = materialThickness.multiply(PPMM);
                 this.hallWidth = hallWidth.multiply(PPMM);
                 this.notchHeight = notchHeight.multiply(PPMM);
                 this.separationSpace = separationSpace.multiply(PPMM);
+                this.maxWidth = maxWidth.multiply(PPMM);
+                this.maxHeight = maxHeight.multiply(PPMM);
             }
         }
 
@@ -281,8 +287,12 @@ public class SheetWallModelGenerator {
         private BigDecimal hallWidth = DEFAULT_HALL_WIDTH;
         private BigDecimal notchHeight = DEFAULT_NOTCH_HEIGHT;
         private BigDecimal separationSpace = DEFAULT_SEPARATION_SPACE;
+        private BigDecimal maxWidth = DEFAULT_MAX_WIDTH;
+        private BigDecimal maxHeight = DEFAULT_MAX_HEIGHT;
 
         /**
+         * sets preferred units for supplying values to the other setters in this class. Whichever is chosen, values
+         * will ultimately get converted to pixels.
          * @param unit inches or cm.
          * @return this
          */
@@ -292,7 +302,8 @@ public class SheetWallModelGenerator {
         }
 
         /**
-         * @param wallHeight new value in inches or centimeters
+         * sets height of the walls
+         * @param wallHeight new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
          * @return this
          */
         public ConfigBuilder withWallHeight(final BigDecimal wallHeight) {
@@ -301,7 +312,8 @@ public class SheetWallModelGenerator {
         }
 
         /**
-         * @param materialThickness new value in inches or centimeters
+         * sets thickness of material being used to print. This will also therefore be the width of the walls.
+         * @param materialThickness new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
          * @return this
          */
         public ConfigBuilder withMaterialThickness(final BigDecimal materialThickness) {
@@ -310,7 +322,8 @@ public class SheetWallModelGenerator {
         }
 
         /**
-         * @param hallWidth new value in inches or centimeters
+         * sets width between walls
+         * @param hallWidth new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
          * @return this
          */
         public ConfigBuilder withHallWidth(final BigDecimal hallWidth) {
@@ -319,7 +332,8 @@ public class SheetWallModelGenerator {
         }
 
         /**
-         * @param notchHeight new value in inches or centimeters
+         * sets height of the floor notches. This dimension is parallel to the walls
+         * @param notchHeight new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
          * @return this
          */
         public ConfigBuilder withNotchHeight(final BigDecimal notchHeight) {
@@ -328,11 +342,32 @@ public class SheetWallModelGenerator {
         }
 
         /**
-         * @param separationSpace new value in inches or centimeters
+         * sets minimum space between vectors
+         * @param separationSpace new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
          * @return this
          */
         public ConfigBuilder withSeparationSpace(final BigDecimal separationSpace) {
             this.separationSpace = separationSpace;
+            return this;
+        }
+
+        /**
+         * sets max width of the SVG so that vectors are contained within an area
+         * @param maxWidth new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
+         * @return this
+         */
+        public ConfigBuilder setMaxWidth(final BigDecimal maxWidth) {
+            this.maxWidth = maxWidth;
+            return this;
+        }
+
+        /**
+         * sets max height of the SVG so that vectors are contained within an area
+         * @param maxHeight new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
+         * @return this
+         */
+        public ConfigBuilder setMaxHeight(final BigDecimal maxHeight) {
+            this.maxHeight = maxHeight;
             return this;
         }
 
@@ -356,11 +391,18 @@ public class SheetWallModelGenerator {
             if (notchHeight.multiply(new BigDecimal(2)).compareTo(hallWidth) >= 0) {
                 errors.append("notchHeight must be less than half of hallWidth; ");
             }
+            if (maxWidth.compareTo(ZERO) <= 0) {
+                errors.append("maxWidth must be positive; ");
+            }
+            if (maxHeight.compareTo(ZERO) <= 0) {
+                errors.append("maxHeight must be positive; ");
+            }
             if (errors.length() > 0) {
                 errors.delete(errors.length() - 2, errors.length());
                 throw new IllegalArgumentException(errors.toString());
             }
-            return new Config(unit, wallHeight, materialThickness, hallWidth, notchHeight, separationSpace);
+            return new Config(unit, wallHeight, materialThickness, hallWidth, notchHeight, separationSpace, maxWidth,
+                maxHeight);
         }
     }
 

@@ -4,12 +4,13 @@ import com.adashrod.graphgeneration.cuttingboardgrids.CuttingBoard;
 import com.adashrod.graphgeneration.mazes.MazePrinter;
 import com.adashrod.graphgeneration.mazes.algorithms.PrimsAlgorithm;
 import com.adashrod.graphgeneration.mazes.factories.LinearWallModelGenerator;
-import com.adashrod.graphgeneration.mazes.factories.SheetWallModelGenerator;
 import com.adashrod.graphgeneration.mazes.factories.RectangularWallModelGenerator;
+import com.adashrod.graphgeneration.mazes.factories.SheetWallModelGenerator;
 import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
 import com.adashrod.graphgeneration.mazes.models.Maze;
-import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
 import com.adashrod.graphgeneration.mazes.models.RectangularWallModel;
+import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
+import com.adashrod.graphgeneration.paisho.PaiShoBoard;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -53,7 +54,7 @@ public final class Main {
     }
 
     public static void main(final String... args) throws Exception {
-        final Maze maze = new Maze(8, 8);
+        final Maze maze = new Maze(20, 12);
         final LinearWallModel linearWallModel;
         final RectangularWallModel rectangularWallModel;
         SheetWallModel sheetWallModel;
@@ -74,15 +75,9 @@ public final class Main {
             .withWallHeight(new BigDecimal(".5"))
             .withNotchHeight(new BigDecimal(".2"))
             .build()).generate();
-        new MazePrinter(sheetWallModel).printSvg("actualTestMazeCutsIn.svg");
-        sheetWallModel = new SheetWallModelGenerator(rectangularWallModel, SheetWallModelGenerator.configure()
-            .withUnit(SheetWallModelGenerator.Config.Unit.MILLIMETERS)
-            .withMaterialThickness(new BigDecimal("3"))
-            .withHallWidth(new BigDecimal("15"))
-            .withSeparationSpace(new BigDecimal("2"))
-            .withWallHeight(new BigDecimal("10"))
-            .withNotchHeight(new BigDecimal("3"))
-            .build()).generate();
-        new MazePrinter(sheetWallModel).printSvg("actualTestMazeCutsMm.svg");
+        new MazePrinter(sheetWallModel).printSvg("actualTestMazeCuts.svg");
+
+        final PaiShoBoard paiShoBoard = new PaiShoBoard(18, 2);
+        paiShoBoard.printSvg("paiSho.svg");
     }
 }

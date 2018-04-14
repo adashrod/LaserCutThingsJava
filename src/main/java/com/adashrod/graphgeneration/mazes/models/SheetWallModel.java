@@ -4,7 +4,6 @@ import com.adashrod.graphgeneration.common.OrderedPair;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,7 +16,8 @@ import java.util.Objects;
 public class SheetWallModel {
     public final Shape floorNotches = new Shape();
     public final Shape floorOutline = new Shape();
-    public final Collection<Shape> walls = new ArrayList<>();
+    public final List<Shape> walls = new ArrayList<>();
+    public boolean outOfBounds;
 
     public SheetWallModel addShape(final Shape shape) {
         walls.add(shape);
@@ -29,6 +29,7 @@ public class SheetWallModel {
      */
     public static class Shape {
         public final List<Path> paths = new ArrayList<>();
+        private BigDecimal cachedWidth, cachedHeight;
 
         public Shape() {}
 
@@ -38,7 +39,44 @@ public class SheetWallModel {
 
         public Shape addPath(final Path path) {
             paths.add(path);
+            cachedWidth = cachedHeight = null;
             return this;
+        }
+
+        public BigDecimal findWidth() {
+            if (cachedWidth != null) {
+                return cachedWidth;
+            }
+            BigDecimal minimum = null, maximum = null;
+            for (final Path path: paths) {
+                for (final OrderedPair<BigDecimal> point: path.points) {
+                    if (minimum == null || minimum.compareTo(point.x) > 0) {
+                        minimum = point.x;
+                    }
+                    if (maximum == null || maximum.compareTo(point.x) < 0) {
+                        maximum = point.x;
+                    }
+                }
+            }
+            return cachedWidth = maximum.subtract(minimum);
+        }
+
+        public BigDecimal findHeight() {
+            if (cachedHeight != null) {
+                return cachedHeight;
+            }
+            BigDecimal minimum = null, maximum = null;
+            for (final Path path: paths) {
+                for (final OrderedPair<BigDecimal> point: path.points) {
+                    if (minimum == null || minimum.compareTo(point.y) > 0) {
+                        minimum = point.y;
+                    }
+                    if (maximum == null || maximum.compareTo(point.y) < 0) {
+                        maximum = point.y;
+                    }
+                }
+            }
+            return cachedHeight = maximum.subtract(minimum);
         }
 
         public Shape translate(final OrderedPair<BigDecimal> delta) {
@@ -70,6 +108,19 @@ public class SheetWallModel {
         public Path setClosed(final boolean isClosed) {
             this.isClosed = isClosed;
             return this;
+        }
+
+        public BigDecimal findWidth() {
+            BigDecimal minimum = null, maximum = null;
+            for (final OrderedPair<BigDecimal> point: points) {
+                if (minimum == null || minimum.compareTo(point.x) > 0) {
+                    minimum = point.x;
+                }
+                if (maximum == null || maximum.compareTo(point.x) < 0) {
+                    maximum = point.x;
+                }
+            }
+            return maximum.subtract(minimum);
         }
 
         public BigDecimal findHeight() {
