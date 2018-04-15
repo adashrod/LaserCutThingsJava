@@ -20,6 +20,7 @@ public class Path {
     public Path(final OrderedPair<BigDecimal> from, final OrderedPair<BigDecimal> to) {
         points.add(from);
         points.add(to);
+        isClosed = false;
     }
 
     public Path addPoint(final OrderedPair<BigDecimal> point) {
