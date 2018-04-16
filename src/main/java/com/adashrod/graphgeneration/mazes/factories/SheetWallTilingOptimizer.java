@@ -15,7 +15,9 @@ import java.util.List;
 import static java.math.BigDecimal.ZERO;
 
 /**
- * todo
+ * This class has an optimization function that tiles the walls in the sheet so that they're
+ * - tiled in a way that fits within the max width and max height
+ * - tiled in a way that wastes a minimal amount of space
  * @author adashrod@gmail.com
  */
 class SheetWallTilingOptimizer {
@@ -33,6 +35,7 @@ class SheetWallTilingOptimizer {
         this.maxHeight = maxHeight;
     }
 
+    // todo: could make this even more efficient by doing rows instead of columns after the first column
     void optimize() {
         final BigDecimal floorWidth = sheetWallModel.floorOutline.findWidth(),
             floorHeight = sheetWallModel.floorOutline.findHeight(),

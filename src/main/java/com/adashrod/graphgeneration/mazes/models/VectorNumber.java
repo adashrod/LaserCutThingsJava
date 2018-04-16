@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * A VectorNumber is a model with a numeric value, and context of width, height, and position
  * @author adashrod@gmail.com
  */
 public class VectorNumber {
@@ -176,6 +177,11 @@ public class VectorNumber {
         return this;
     }
 
+    /**
+     * Given a digit character, returns a {@link Shape} with points describing the shape of that numeral
+     * @param c a digit char
+     * @return a shape that looks like the numeral
+     */
     public static Shape characterToShape(final char c) {
         return Shape.copy(charMap.get(c));
     }

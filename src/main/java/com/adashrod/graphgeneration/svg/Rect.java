@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
- * todo
- * Created by aaron on 2018-04-01.
+ * an SVG <rect/> element
+ * @author adashrod@gmail.com
  */
 public class Rect {
     public String style = "stroke:#000000;fill:none;";//fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1";

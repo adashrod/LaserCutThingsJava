@@ -12,7 +12,8 @@ import static com.adashrod.graphgeneration.mazes.models.VectorNumber.CHARACTER_W
 import static java.math.BigDecimal.ZERO;
 
 /**
- * todo
+ * A simple, not very flexible utility for serializing SVG elements to strings for manual SVG file construction.
+ * To be replaced by an SVG library later.
  * @author adashrod@gmail.com
  */
 public class SvgElementGenerator {

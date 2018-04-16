@@ -55,7 +55,7 @@ public final class Main {
     }
 
     public static void main(final String... args) throws Exception {
-        final Maze maze = new Maze(16, 8);
+        final Maze maze = new Maze(12, 12);
         final LinearWallModel linearWallModel;
         final RectangularWallModel rectangularWallModel;
         SheetWallModel sheetWallModel;

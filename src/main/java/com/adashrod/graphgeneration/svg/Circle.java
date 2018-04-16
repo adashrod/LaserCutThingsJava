@@ -5,7 +5,7 @@ import com.adashrod.graphgeneration.common.OrderedPair;
 import java.math.BigDecimal;
 
 /**
- * todo
+ * an SVG <circle/> element
  * @author adashrod@gmail.com
  */
 public class Circle {

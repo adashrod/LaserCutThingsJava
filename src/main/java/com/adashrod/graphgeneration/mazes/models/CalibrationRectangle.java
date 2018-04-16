@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import static java.math.BigDecimal.ZERO;
 
 /**
+ * A model for a single rectangle with integral width and height values in inches or cm. This can be printed on an SVG
+ * to help calibrate the scale of the SVG on printing software.
  * @author adashrod@gmail.com
  */
 public class CalibrationRectangle {
