@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.math.BigDecimal.ZERO;
+
 /**
  * A path is a set of points. The implication is that there is a line from point 0 to point 1, point 1 to
  * point 2, ..., point n - 1 to point n, and (if isClosed == true) point n to point 0
@@ -43,6 +45,9 @@ public class Path {
                 maximum = point.x;
             }
         }
+        if (maximum == null || minimum == null) {
+            return ZERO;
+        }
         return maximum.subtract(minimum);
     }
 
@@ -55,6 +60,9 @@ public class Path {
             if (maximum == null || maximum.compareTo(point.y) < 0) {
                 maximum = point.y;
             }
+        }
+        if (maximum == null || minimum == null) {
+            return ZERO;
         }
         return maximum.subtract(minimum);
     }

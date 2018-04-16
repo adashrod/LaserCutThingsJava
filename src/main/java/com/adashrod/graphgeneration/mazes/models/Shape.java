@@ -37,7 +37,7 @@ public class Shape {
         if (cachedWidth != null) {
             return cachedWidth;
         }
-        BigDecimal minimum = ZERO, maximum = ZERO;
+        BigDecimal minimum = null, maximum = null;
         for (final Path path: paths) {
             for (final OrderedPair<BigDecimal> point: path.points) {
                 if (minimum == null || minimum.compareTo(point.x) > 0) {
@@ -48,6 +48,9 @@ public class Shape {
                 }
             }
         }
+        if (maximum == null || minimum == null) {
+            return ZERO;
+        }
         return cachedWidth = maximum.subtract(minimum);
     }
 
@@ -55,7 +58,7 @@ public class Shape {
         if (cachedHeight != null) {
             return cachedHeight;
         }
-        BigDecimal minimum = ZERO, maximum = ZERO;
+        BigDecimal minimum = null, maximum = null;
         for (final Path path: paths) {
             for (final OrderedPair<BigDecimal> point: path.points) {
                 if (minimum == null || minimum.compareTo(point.y) > 0) {
@@ -65,6 +68,9 @@ public class Shape {
                     maximum = point.y;
                 }
             }
+        }
+        if (maximum == null || minimum == null) {
+            return ZERO;
         }
         return cachedHeight = maximum.subtract(minimum);
     }
