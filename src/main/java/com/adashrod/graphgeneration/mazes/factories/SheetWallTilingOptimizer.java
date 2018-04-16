@@ -3,6 +3,7 @@ package com.adashrod.graphgeneration.mazes.factories;
 import com.adashrod.graphgeneration.common.OrderedPair;
 import com.adashrod.graphgeneration.mazes.models.Shape;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
+import com.adashrod.graphgeneration.mazes.models.VectorNumber;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -77,6 +78,12 @@ class SheetWallTilingOptimizer {
 
     private void addToCurrentRow(final Shape wall) {
         wall.translate(cursor);
+        final VectorNumber wallLabel = sheetWallModel.wallLabels.get(wall);
+        final BigDecimal half = new BigDecimal(".5");
+        wallLabel.translate(new OrderedPair<>(
+            cursor.x.add(wall.findWidth().multiply(half)).subtract(wallLabel.width.multiply(half)),
+            cursor.y.add(wall.findHeight().multiply(half)).subtract(wallLabel.height.multiply(half))
+        ));
         sheetWallModel.walls.add(wall);
         cursor.x = cursor.x.add(wall.findWidth()).add(separationSpace);
     }

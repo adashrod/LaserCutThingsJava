@@ -4,6 +4,7 @@ import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
 import com.adashrod.graphgeneration.mazes.models.Maze;
 import com.adashrod.graphgeneration.mazes.models.Shape;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
+import com.adashrod.graphgeneration.mazes.models.VectorNumber;
 import com.adashrod.graphgeneration.svg.Path;
 import com.adashrod.graphgeneration.svg.SvgElementGenerator;
 
@@ -215,6 +216,18 @@ public class MazePrinter {
                     final Path svgPath = svgElementGenerator.sheetPathToSvgPath(wall);
                     fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
                 }
+            }
+            fileWriter.append("</g>\n");
+
+            fileWriter.append("<g id=\"floor-numbers\">");
+            for (final VectorNumber floorNumber: sheetWallModel.floorNumbers) {
+                fileWriter.append(svgElementGenerator.vectorNumberToSvgText(floorNumber, precision));
+            }
+            fileWriter.append("</g>\n");
+
+            fileWriter.append("<g id=\"wall-numbers\">");
+            for (final VectorNumber wallNumber: sheetWallModel.wallLabels.values()) {
+                fileWriter.append(svgElementGenerator.vectorNumberToSvgText(wallNumber, precision));
             }
             fileWriter.append("</g>\n");
 

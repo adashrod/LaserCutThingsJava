@@ -2,11 +2,13 @@ package com.adashrod.graphgeneration.svg;
 
 import com.adashrod.graphgeneration.common.OrderedPair;
 import com.adashrod.graphgeneration.mazes.models.Shape;
+import com.adashrod.graphgeneration.mazes.models.VectorNumber;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 
-import static com.adashrod.graphgeneration.svg.VectorNumber.SPACING;
+import static com.adashrod.graphgeneration.mazes.models.VectorNumber.CHARACTER_HEIGHT;
+import static com.adashrod.graphgeneration.mazes.models.VectorNumber.CHARACTER_WIDTH;
 import static java.math.BigDecimal.ZERO;
 
 /**
@@ -59,12 +61,12 @@ public class SvgElementGenerator {
         for (int i = 0; i < vnStr.length(); i++) {
             final char c = vnStr.charAt(i);
             final Shape charShape = VectorNumber.characterToShape(c);
-            final BigDecimal currentWidth = stringShape.findWidth();
-            charShape.translate(new OrderedPair<>(currentWidth.add(SPACING), ZERO));
+            final BigDecimal currentWidth = new BigDecimal(i * CHARACTER_WIDTH);
+            charShape.translate(new OrderedPair<>(currentWidth, ZERO));
             stringShape.addShape(charShape);
         }
-        stringShape.scale(new OrderedPair<>(vectorNumber.width.divide(stringShape.findWidth(), mc),
-            vectorNumber.height.divide(stringShape.findHeight(), mc))).translate(vectorNumber.position);
+        stringShape.scale(new OrderedPair<>(vectorNumber.width.divide(new BigDecimal(CHARACTER_WIDTH * vnStr.length()), mc),
+            vectorNumber.height.divide(new BigDecimal(CHARACTER_HEIGHT), mc))).translate(vectorNumber.position);
         final StringBuilder svgTextBuilder = new StringBuilder();
         stringShape.paths.forEach((final com.adashrod.graphgeneration.mazes.models.Path path) -> {
             final Path svgPath = sheetPathToSvgPath(path);

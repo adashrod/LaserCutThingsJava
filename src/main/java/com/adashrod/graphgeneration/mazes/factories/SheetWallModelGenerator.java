@@ -6,6 +6,7 @@ import com.adashrod.graphgeneration.mazes.models.Path;
 import com.adashrod.graphgeneration.mazes.models.RectangularWallModel;
 import com.adashrod.graphgeneration.mazes.models.Shape;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
+import com.adashrod.graphgeneration.mazes.models.VectorNumber;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ public class SheetWallModelGenerator {
 
     private final Map<Path, NotchPosInfo> notchEdgeMap = new HashMap<>();
     private final RectangularWallModel model;
+    private final Map<BigDecimal, Integer> wallTypeLabelsByLength = new HashMap<>();
 
     private static final Map<Direction, Integer> directionRank = new HashMap<>();
     static {
@@ -71,15 +73,27 @@ public class SheetWallModelGenerator {
 
         // for now, all walls and the floor will be positioned at (0,0). They'll be translated and tiled on the
         // print sheet later
-        model.walls.stream().map(wall -> createNotchesForWall(wall, sheetWallModel)).map(wallLength -> new Path()
-            .addPoint(new OrderedPair<>(ZERO, ZERO))
-            .addPoint(new OrderedPair<>(wallLength, ZERO))
-            .addPoint(new OrderedPair<>(wallLength, wallHeight.add(materialThickness)))
-            .addPoint(new OrderedPair<>(wallLength.subtract(notchHeight), wallHeight.add(materialThickness)))
-            .addPoint(new OrderedPair<>(wallLength.subtract(notchHeight), wallHeight))
-            .addPoint(new OrderedPair<>(notchHeight, wallHeight))
-            .addPoint(new OrderedPair<>(notchHeight, wallHeight.add(materialThickness)))
-            .addPoint(new OrderedPair<>(ZERO, wallHeight.add(materialThickness)))).forEach(wallPath -> sheetWallModel.addShape(new Shape(wallPath)));
+        final List<RectangularWallModel.Wall> sortedWalls = new ArrayList<>(model.walls);
+        sortedWalls.sort(Comparator.comparing(wall -> wall.length));
+        for (final RectangularWallModel.Wall wall: sortedWalls) {
+            final BigDecimal wallLength = createNotchesForWall(wall, sheetWallModel);
+            final Path wallPath = new Path()
+                .addPoint(new OrderedPair<>(ZERO, ZERO))
+                .addPoint(new OrderedPair<>(wallLength, ZERO))
+                .addPoint(new OrderedPair<>(wallLength, wallHeight.add(materialThickness)))
+                .addPoint(new OrderedPair<>(wallLength.subtract(notchHeight), wallHeight.add(materialThickness)))
+                .addPoint(new OrderedPair<>(wallLength.subtract(notchHeight), wallHeight))
+                .addPoint(new OrderedPair<>(notchHeight, wallHeight))
+                .addPoint(new OrderedPair<>(notchHeight, wallHeight.add(materialThickness)))
+                .addPoint(new OrderedPair<>(ZERO, wallHeight.add(materialThickness)));
+            final Shape wallShape = new Shape(wallPath);
+            sheetWallModel.addShape(wallShape);
+            final int wallTypeLabel = findWallTypeLabel(wallLength);
+            final BigDecimal vnHeight = wallHeight.multiply(new BigDecimal(".5")),
+                vnWidth = vnHeight.multiply(new BigDecimal(".5")).multiply(new BigDecimal(numDigits(wallTypeLabel)));
+            sheetWallModel.wallLabels.put(wallShape, new VectorNumber(wallTypeLabel, vnWidth.min(wallLength), vnHeight,
+                new OrderedPair<>(ZERO, ZERO))); // translate in optimizer
+        }
         createOutline(sheetWallModel);
         new SheetWallTilingOptimizer(sheetWallModel, separationSpace, maxWidth, maxHeight).optimize();
         return sheetWallModel;
@@ -99,16 +113,25 @@ public class SheetWallModelGenerator {
     }
 
     private BigDecimal createNotchesForWall(final RectangularWallModel.Wall wall, final SheetWallModel sheetWallModel) {
+        final BigDecimal half = new BigDecimal(".5");
         // notches in the floor for the wall tabs to fit into
         final Path firstNotch = new Path(),
             secondNotch = new Path();
         final BigDecimal wallLength;
+        final VectorNumber vectorNumber;
         if (wall.getWallDirection() == EAST) {
             wallLength = calcDisplacement(wall.end.x + 1)
                 .subtract(calcDisplacement(wall.start.x));
+            final int wallTypeLabel = findWallTypeLabel(wallLength);
             final BigDecimal startDisplacementX = calcDisplacement(wall.start.x),
                 endDisplacementX = calcDisplacement(wall.end.x + 1).subtract(notchHeight),
                 displacementY = calcDisplacement(wall.start.y);
+            final BigDecimal spaceBetweenNotches = endDisplacementX.subtract(startDisplacementX).subtract(notchHeight);
+            BigDecimal vnWidth = materialThickness.multiply(half).multiply(new BigDecimal(numDigits(wallTypeLabel)));
+            vnWidth = vnWidth.min(spaceBetweenNotches);
+            vectorNumber = new VectorNumber(wallTypeLabel, vnWidth, materialThickness, new OrderedPair<>(
+                startDisplacementX.add(notchHeight).add(spaceBetweenNotches.multiply(half).subtract(vnWidth.multiply(half))), displacementY));
+            sheetWallModel.floorNumbers.add(vectorNumber);
             firstNotch.addPoint(new OrderedPair<>(startDisplacementX, displacementY))
                 .addPoint(new OrderedPair<>(startDisplacementX.add(notchHeight), displacementY))
                 .addPoint(new OrderedPair<>(startDisplacementX.add(notchHeight), displacementY.add(materialThickness)))
@@ -120,9 +143,16 @@ public class SheetWallModelGenerator {
         } else {
             wallLength = calcDisplacement(wall.end.y + 1)
                 .subtract(calcDisplacement(wall.start.y));
+            final int wallTypeLabel = findWallTypeLabel(wallLength);
             final BigDecimal startDisplacementY = calcDisplacement(wall.start.y),
                 endDisplacementY = calcDisplacement(wall.end.y + 1).subtract(notchHeight),
                 displacementX = calcDisplacement(wall.start.x);
+            final BigDecimal spaceBetweenNotches = endDisplacementY.subtract(startDisplacementY).subtract(notchHeight);
+            BigDecimal vnWidth = materialThickness.multiply(half).multiply(new BigDecimal(numDigits(wallTypeLabel)));
+            vnWidth = vnWidth.min(materialThickness);
+            vectorNumber = new VectorNumber(wallTypeLabel, vnWidth, materialThickness, new OrderedPair<>(displacementX.add(materialThickness.multiply(half)).subtract(vnWidth.multiply(half)),
+                startDisplacementY.add(notchHeight).add(spaceBetweenNotches.multiply(half).subtract(materialThickness.multiply(half))))); // adjust the xPos of the vn to be centered
+            sheetWallModel.floorNumbers.add(vectorNumber);
             firstNotch.addPoint(new OrderedPair<>(displacementX, startDisplacementY))
                 .addPoint(new OrderedPair<>(displacementX.add(materialThickness), startDisplacementY))
                 .addPoint(new OrderedPair<>(displacementX.add(materialThickness), startDisplacementY.add(notchHeight)))
@@ -209,6 +239,29 @@ public class SheetWallModelGenerator {
             throw new IllegalStateException("notch is not in edge map, but is on edge");
         }
         return new NotchConnection(firstPoint, floorCornerPoint, secondPoint);
+    }
+
+    private int numDigits(final long number) {
+        final long n = number < 0 ? -1 * number : number;
+        int exp = 1;
+        int powerOfTen = 10;
+        while (true) {
+            if (n < powerOfTen) {
+                return exp;
+            }
+            powerOfTen *= 10;
+            exp++;
+        }
+    }
+
+    private int findWallTypeLabel(final BigDecimal wallLength) {
+        Integer label = wallTypeLabelsByLength.get(wallLength);
+        if (label != null) {
+            return label;
+        }
+        label = wallTypeLabelsByLength.size();
+        wallTypeLabelsByLength.put(wallLength, label);
+        return label;
     }
 
     /**
