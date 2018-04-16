@@ -54,6 +54,13 @@ public class SvgElementGenerator {
             circle.center.x.round(mc), circle.center.y.round(mc), circle.radius.round(mc));
     }
 
+    public String rectToSvgText(final Rect rect, final int fpPrecision) {
+        final MathContext mc = new MathContext(fpPrecision);
+        return String.format("<rect style=\"%s\" x=\"%s\" y=\"%s\" width=\"%s\" height=\"%s\"/>",
+            rect.style != null ? rect.style : "",
+            rect.x.round(mc), rect.y.round(mc), rect.width.round(mc), rect.height.round(mc));
+    }
+
     public String vectorNumberToSvgText(final VectorNumber vectorNumber, final int fpPrecision) {
         final MathContext mc = new MathContext(fpPrecision);
         final String vnStr = String.valueOf(vectorNumber.number);

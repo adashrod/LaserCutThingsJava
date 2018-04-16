@@ -1,6 +1,7 @@
 package com.adashrod.graphgeneration.mazes.factories;
 
 import com.adashrod.graphgeneration.common.OrderedPair;
+import com.adashrod.graphgeneration.common.Unit;
 import com.adashrod.graphgeneration.mazes.Direction;
 import com.adashrod.graphgeneration.mazes.models.Path;
 import com.adashrod.graphgeneration.mazes.models.RectangularWallModel;
@@ -27,8 +28,6 @@ import static java.math.BigDecimal.ZERO;
  * @author adashrod@gmail.com
  */
 public class SheetWallModelGenerator {
-    public static final BigDecimal PPI = new BigDecimal("90.000001");
-    public static final BigDecimal PPMM = new BigDecimal("3.5433071");
     public static final BigDecimal DEFAULT_WALL_HEIGHT = new BigDecimal("0.5");
     public static final BigDecimal DEFAULT_MATERIAL_THICKNESS = new BigDecimal(".118");
     public static final BigDecimal DEFAULT_HALL_WIDTH = new BigDecimal("0.5");
@@ -310,33 +309,18 @@ public class SheetWallModelGenerator {
         public Config(final Unit unit, final BigDecimal wallHeight, final BigDecimal materialThickness,
                 final BigDecimal hallWidth, final BigDecimal notchHeight, final BigDecimal separationSpace,
                 final BigDecimal maxWidth, final BigDecimal maxHeight) {
-            if (unit == Unit.INCHES) {
-                this.wallHeight = wallHeight.multiply(PPI);
-                this.materialThickness = materialThickness.multiply(PPI);
-                this.hallWidth = hallWidth.multiply(PPI);
-                this.notchHeight = notchHeight.multiply(PPI);
-                this.separationSpace = separationSpace.multiply(PPI);
-                this.maxWidth = maxWidth.multiply(PPI);
-                this.maxHeight = maxHeight.multiply(PPI);
-            } else {
-                this.wallHeight = wallHeight.multiply(PPMM);
-                this.materialThickness = materialThickness.multiply(PPMM);
-                this.hallWidth = hallWidth.multiply(PPMM);
-                this.notchHeight = notchHeight.multiply(PPMM);
-                this.separationSpace = separationSpace.multiply(PPMM);
-                this.maxWidth = maxWidth.multiply(PPMM);
-                this.maxHeight = maxHeight.multiply(PPMM);
-            }
-        }
-
-        public enum Unit {
-            INCHES,
-            MILLIMETERS
+            this.wallHeight = wallHeight.multiply(unit.getPixelsPer());
+            this.materialThickness = materialThickness.multiply(unit.getPixelsPer());
+            this.hallWidth = hallWidth.multiply(unit.getPixelsPer());
+            this.notchHeight = notchHeight.multiply(unit.getPixelsPer());
+            this.separationSpace = separationSpace.multiply(unit.getPixelsPer());
+            this.maxWidth = maxWidth.multiply(unit.getPixelsPer());
+            this.maxHeight = maxHeight.multiply(unit.getPixelsPer());
         }
     }
 
     public static class ConfigBuilder {
-        private Config.Unit unit = Config.Unit.INCHES;
+        private Unit unit = Unit.INCHES;
         private BigDecimal wallHeight = DEFAULT_WALL_HEIGHT;
         private BigDecimal materialThickness = DEFAULT_MATERIAL_THICKNESS;
         private BigDecimal hallWidth = DEFAULT_HALL_WIDTH;
@@ -351,14 +335,14 @@ public class SheetWallModelGenerator {
          * @param unit inches or cm.
          * @return this
          */
-        public ConfigBuilder withUnit(final Config.Unit unit) {
+        public ConfigBuilder withUnit(final Unit unit) {
             this.unit = unit;
             return this;
         }
 
         /**
          * sets height of the walls
-         * @param wallHeight new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
+         * @param wallHeight new value in the unit specified in {@link ConfigBuilder#withUnit(Unit)}
          * @return this
          */
         public ConfigBuilder withWallHeight(final BigDecimal wallHeight) {
@@ -368,7 +352,7 @@ public class SheetWallModelGenerator {
 
         /**
          * sets thickness of material being used to print. This will also therefore be the width of the walls.
-         * @param materialThickness new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
+         * @param materialThickness new value in the unit specified in {@link ConfigBuilder#withUnit(Unit)}
          * @return this
          */
         public ConfigBuilder withMaterialThickness(final BigDecimal materialThickness) {
@@ -378,7 +362,7 @@ public class SheetWallModelGenerator {
 
         /**
          * sets width between walls
-         * @param hallWidth new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
+         * @param hallWidth new value in the unit specified in {@link ConfigBuilder#withUnit(Unit)}
          * @return this
          */
         public ConfigBuilder withHallWidth(final BigDecimal hallWidth) {
@@ -388,7 +372,7 @@ public class SheetWallModelGenerator {
 
         /**
          * sets height of the floor notches. This dimension is parallel to the walls
-         * @param notchHeight new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
+         * @param notchHeight new value in the unit specified in {@link ConfigBuilder#withUnit(Unit)}
          * @return this
          */
         public ConfigBuilder withNotchHeight(final BigDecimal notchHeight) {
@@ -398,7 +382,7 @@ public class SheetWallModelGenerator {
 
         /**
          * sets minimum space between vectors
-         * @param separationSpace new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
+         * @param separationSpace new value in the unit specified in {@link ConfigBuilder#withUnit(Unit)}
          * @return this
          */
         public ConfigBuilder withSeparationSpace(final BigDecimal separationSpace) {
@@ -408,20 +392,20 @@ public class SheetWallModelGenerator {
 
         /**
          * sets max width of the SVG so that vectors are contained within an area
-         * @param maxWidth new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
+         * @param maxWidth new value in the unit specified in {@link ConfigBuilder#withUnit(Unit)}
          * @return this
          */
-        public ConfigBuilder setMaxWidth(final BigDecimal maxWidth) {
+        public ConfigBuilder withMaxWidth(final BigDecimal maxWidth) {
             this.maxWidth = maxWidth;
             return this;
         }
 
         /**
          * sets max height of the SVG so that vectors are contained within an area
-         * @param maxHeight new value in the unit specified in {@link ConfigBuilder#withUnit(Config.Unit)}
+         * @param maxHeight new value in the unit specified in {@link ConfigBuilder#withUnit(Unit)}
          * @return this
          */
-        public ConfigBuilder setMaxHeight(final BigDecimal maxHeight) {
+        public ConfigBuilder withMaxHeight(final BigDecimal maxHeight) {
             this.maxHeight = maxHeight;
             return this;
         }

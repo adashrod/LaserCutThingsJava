@@ -8,7 +8,7 @@ import java.util.Objects;
  * Created by aaron on 2018-04-01.
  */
 public class Rect {
-    public final String style = "stroke:#000000";//"fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1";
+    public String style = "stroke:#000000;fill:none;";//fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1";
     public String id;
     public BigDecimal width;
     public BigDecimal height;
@@ -19,6 +19,14 @@ public class Rect {
         this.id = id;
         this.width = size;
         this.height = size;
+        this.x = x;
+        this.y = y;
+    }
+
+    public Rect(final String id, final BigDecimal width, final BigDecimal height, final BigDecimal x, final BigDecimal y) {
+        this.id = id;
+        this.width = width;
+        this.height = height;
         this.x = x;
         this.y = y;
     }

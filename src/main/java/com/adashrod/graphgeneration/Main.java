@@ -1,16 +1,17 @@
 package com.adashrod.graphgeneration;
 
+import com.adashrod.graphgeneration.common.Unit;
 import com.adashrod.graphgeneration.cuttingboardgrids.CuttingBoard;
 import com.adashrod.graphgeneration.mazes.MazePrinter;
 import com.adashrod.graphgeneration.mazes.algorithms.PrimsAlgorithm;
 import com.adashrod.graphgeneration.mazes.factories.LinearWallModelGenerator;
 import com.adashrod.graphgeneration.mazes.factories.RectangularWallModelGenerator;
 import com.adashrod.graphgeneration.mazes.factories.SheetWallModelGenerator;
+import com.adashrod.graphgeneration.mazes.models.CalibrationRectangle;
 import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
 import com.adashrod.graphgeneration.mazes.models.Maze;
 import com.adashrod.graphgeneration.mazes.models.RectangularWallModel;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
-import com.adashrod.graphgeneration.paisho.PaiShoBoard;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -54,7 +55,7 @@ public final class Main {
     }
 
     public static void main(final String... args) throws Exception {
-        final Maze maze = new Maze(20, 12);
+        final Maze maze = new Maze(16, 8);
         final LinearWallModel linearWallModel;
         final RectangularWallModel rectangularWallModel;
         SheetWallModel sheetWallModel;
@@ -68,16 +69,19 @@ public final class Main {
         new MazePrinter(linearWallModel).printTestSvg("actualTestMaze.svg");
         rectangularWallModel = new RectangularWallModelGenerator(linearWallModel).generate();
         sheetWallModel = new SheetWallModelGenerator(rectangularWallModel, SheetWallModelGenerator.configure()
-            .withUnit(SheetWallModelGenerator.Config.Unit.INCHES)
+            .withUnit(Unit.INCHES)
             .withMaterialThickness(new BigDecimal(".118"))
             .withHallWidth(new BigDecimal(".5"))
             .withSeparationSpace(new BigDecimal(".05"))
             .withWallHeight(new BigDecimal(".5"))
             .withNotchHeight(new BigDecimal(".2"))
+            .withMaxWidth(new BigDecimal("19.5"))
+            .withMaxHeight(new BigDecimal("11"))
             .build()).generate();
-        new MazePrinter(sheetWallModel).printSvg("actualTestMazeCuts.svg");
-
-        final PaiShoBoard paiShoBoard = new PaiShoBoard(18, 2);
-        paiShoBoard.printSvg("paiSho.svg");
+        new MazePrinter(sheetWallModel).printSvg("actualTestMazeCuts.svg", CalibrationRectangle.configure()
+            .withWidth(6).withHeight(6).withUnit(Unit.INCHES).withTopAlignment().withLeftAlignment()
+            .withMaxWidth(new BigDecimal("19.5"))
+            .withMaxHeight(new BigDecimal("11"))
+            .build());
     }
 }

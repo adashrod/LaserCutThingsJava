@@ -1,11 +1,13 @@
 package com.adashrod.graphgeneration.mazes;
 
+import com.adashrod.graphgeneration.mazes.models.CalibrationRectangle;
 import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
 import com.adashrod.graphgeneration.mazes.models.Maze;
 import com.adashrod.graphgeneration.mazes.models.Shape;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
 import com.adashrod.graphgeneration.mazes.models.VectorNumber;
 import com.adashrod.graphgeneration.svg.Path;
+import com.adashrod.graphgeneration.svg.Rect;
 import com.adashrod.graphgeneration.svg.SvgElementGenerator;
 
 import java.io.BufferedReader;
@@ -14,7 +16,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.math.BigDecimal;
 import java.util.Objects;
+
+import static java.math.BigDecimal.ZERO;
 
 /**
  * Utility for printing {@link Maze}s and {@link LinearWallModel}s in various forms
@@ -180,11 +185,15 @@ public class MazePrinter {
         }
     }
 
+    public void printSvg(final String name) throws IOException {
+        printSvg(name, null);
+    }
+
     /**
      * Prints an SVG with shapes representing cut-out sections that will be the walls and floor of a maze
      * @param name filename to create
      */
-    public void printSvg(final String name) throws IOException {
+    public void printSvg(final String name, final CalibrationRectangle calibrationRectangle) throws IOException {
         if (sheetWallModel == null) {
             throw new IllegalStateException("sheetWallModel can't be null");
         }
@@ -231,8 +240,31 @@ public class MazePrinter {
             }
             fileWriter.append("</g>\n");
 
+            if (calibrationRectangle != null) {
+                fileWriter.append(svgElementGenerator.rectToSvgText(buildCalibrationRectangle(calibrationRectangle), precision));
+            }
+
             fileWriter.append("</svg>\n");
             fileWriter.flush();
         }
+    }
+
+    private Rect buildCalibrationRectangle(final CalibrationRectangle calibrationRectangle) {
+        final BigDecimal width, height, x, y;
+        width = calibrationRectangle.getUnit().getPixelsPer().multiply(new BigDecimal(calibrationRectangle.getWidth()));
+        height = calibrationRectangle.getUnit().getPixelsPer().multiply(new BigDecimal(calibrationRectangle.getHeight()));
+        if (calibrationRectangle.isLeftAligned()) {
+            x = ZERO;
+        } else {
+            x = calibrationRectangle.getMaxWidth().subtract(width);
+        }
+        if (calibrationRectangle.isTopAligned()) {
+            y = ZERO;
+        } else {
+            y = calibrationRectangle.getMaxHeight().subtract(height);
+        }
+        final Rect rect = new Rect("calibration-rectangle", width, height, x, y);
+        rect.style = rect.style.replace("000000", "00ff00");
+        return rect;
     }
 }
