@@ -21,20 +21,15 @@ import static com.adashrod.graphgeneration.mazes.Direction.determineDirection;
  */
 public class RectangularWallModelGenerator {
     private final LinearWallModel model;
-    private final Space[][] grid;
+    private final boolean[][] isWall;
 
     public RectangularWallModelGenerator(final LinearWallModel model) {
         this.model = model;
-        grid = new Space[2 * model.height + 1][2 * model.width + 1];
-        for (int y = 0; y < grid.length; y++) {
-            for (int x = 0; x < grid[0].length; x++) {
-                grid[y][x] = new Space();
-            }
-        }
+        isWall = new boolean[2 * model.height + 1][2 * model.width + 1];
     }
 
     public RectangularWallModel generate() {
-        final RectangularWallModel rectangularWallModel = new RectangularWallModel(2 * model.width + 1, 2 * model.height + 1);
+        final RectangularWallModel rectangularWallModel = new RectangularWallModel(isWall.length, isWall[0].length);
 
         final Collection<LinearWallModel.Wall> verticalWalls = new ArrayList<>(), horizontalWalls = new ArrayList<>();
         model.walls.forEach((final LinearWallModel.Wall wall) -> {
@@ -68,11 +63,11 @@ public class RectangularWallModelGenerator {
             int wsx = wall.start.x * 2, wex = wall.end.x * 2, wsy = wall.start.y * 2, wey = wall.end.y * 2;
             if (!isFirstSetOfWalls) {
                 if (wallsAreVertical) {
-                    if (grid[wsy][wsx].isWall) { wsy++; }
-                    if (grid[wey][wex].isWall) { wey--; }
+                    if (isWall[wsy][wsx]) { wsy++; }
+                    if (isWall[wey][wex]) { wey--; }
                 } else {
-                    if (grid[wsy][wsx].isWall) { wsx++; }
-                    if (grid[wey][wex].isWall) { wex--; }
+                    if (isWall[wsy][wsx]) { wsx++; }
+                    if (isWall[wey][wex]) { wex--; }
                 }
             }
             final RectangularWallModel.Wall rectWall = new RectangularWallModel.Wall(new OrderedPair<>(wsx, wsy),
@@ -86,23 +81,13 @@ public class RectangularWallModelGenerator {
             final int wey) {
         if (wallsAreVertical) {
             for (int y = wsy; y <= wey; y++) {
-                grid[y][wsx].isWall = true;
+                isWall[y][wsx] = true;
             }
         } else {
             for (int x = wsx; x <= wex; x++) {
-                grid[wsy][x].isWall = true;
+                isWall[wsy][x] = true;
             }
         }
 
-    }
-
-    private static class Space {
-        public boolean isWall;
-        public final Collection<Direction> endDirections = new ArrayList<>(); // todo: get rid of direct access
-
-        @Override
-        public String toString() {
-            return String.format("Space[%s,%s]", isWall ? "#" : " ", endDirections.isEmpty() ? "" : endDirections);
-        }
     }
 }

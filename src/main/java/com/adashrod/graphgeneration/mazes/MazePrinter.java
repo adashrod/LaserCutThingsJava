@@ -208,12 +208,12 @@ public class MazePrinter {
 
             fileWriter.append("<g id=\"floor\">");
             for (final com.adashrod.graphgeneration.mazes.models.Path notch: sheetWallModel.floorNotches.paths) {
-                final Path svgPath = svgElementGenerator.sheetPathToSvgPath(notch);
+                final Path svgPath = svgElementGenerator.modelPathToSvgPath(notch);
                 fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
             }
 
             for (final com.adashrod.graphgeneration.mazes.models.Path outlinePath: sheetWallModel.floorOutline.paths) {
-                final Path svgPath = svgElementGenerator.sheetPathToSvgPath(outlinePath);
+                final Path svgPath = svgElementGenerator.modelPathToSvgPath(outlinePath);
                 svgPath.style = svgPath.style.replace("#000000", "#ff0000");
                 fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
             }
@@ -222,7 +222,7 @@ public class MazePrinter {
             fileWriter.append("<g id=\"walls\">");
             for (final Shape shape: sheetWallModel.walls) {
                 for (final com.adashrod.graphgeneration.mazes.models.Path wall: shape.paths) {
-                    final Path svgPath = svgElementGenerator.sheetPathToSvgPath(wall);
+                    final Path svgPath = svgElementGenerator.modelPathToSvgPath(wall);
                     fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
                 }
             }

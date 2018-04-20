@@ -150,7 +150,7 @@ public class SheetWallModelGenerator {
             BigDecimal vnWidth = materialThickness.multiply(half).multiply(new BigDecimal(numDigits(wallTypeLabel)));
             vnWidth = vnWidth.min(materialThickness);
             vectorNumber = new VectorNumber(wallTypeLabel, vnWidth, materialThickness, new OrderedPair<>(displacementX.add(materialThickness.multiply(half)).subtract(vnWidth.multiply(half)),
-                startDisplacementY.add(notchHeight).add(spaceBetweenNotches.multiply(half).subtract(materialThickness.multiply(half))))); // adjust the xPos of the vn to be centered
+                startDisplacementY.add(notchHeight).add(spaceBetweenNotches.multiply(half).subtract(materialThickness.multiply(half)))));
             sheetWallModel.floorNumbers.add(vectorNumber);
             firstNotch.addPoint(new OrderedPair<>(displacementX, startDisplacementY))
                 .addPoint(new OrderedPair<>(displacementX.add(materialThickness), startDisplacementY))

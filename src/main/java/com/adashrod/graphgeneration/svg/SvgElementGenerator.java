@@ -17,7 +17,7 @@ import static java.math.BigDecimal.ZERO;
  * @author adashrod@gmail.com
  */
 public class SvgElementGenerator {
-    public Path sheetPathToSvgPath(final com.adashrod.graphgeneration.mazes.models.Path path) {
+    public Path modelPathToSvgPath(final com.adashrod.graphgeneration.mazes.models.Path path) {
         final Path result = new Path();
         result.multiPartPath.addAll(path.points);
         if (path.isClosed) {
@@ -77,7 +77,7 @@ public class SvgElementGenerator {
             vectorNumber.height.divide(new BigDecimal(CHARACTER_HEIGHT), mc))).translate(vectorNumber.position);
         final StringBuilder svgTextBuilder = new StringBuilder();
         stringShape.paths.forEach((final com.adashrod.graphgeneration.mazes.models.Path path) -> {
-            final Path svgPath = sheetPathToSvgPath(path);
+            final Path svgPath = modelPathToSvgPath(path);
             svgPath.style = svgPath.style.replace("000000", "0000ff");
             svgTextBuilder.append(pathToSvgText(svgPath, fpPrecision));
         });

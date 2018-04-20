@@ -81,8 +81,10 @@ public class Path {
         for (final OrderedPair<BigDecimal> point: points) {
             pointsBuilder.append("(").append(point.x).append(", ").append(point.y).append(") -> ");
         }
-        pointsBuilder.delete(pointsBuilder.length() - 4, pointsBuilder.length());
-        return String.format("ClosedPath[%s]", pointsBuilder.toString());
+        if (pointsBuilder.length() > 0) {
+            pointsBuilder.delete(pointsBuilder.length() - 4, pointsBuilder.length());
+        }
+        return String.format("Path[%s]", pointsBuilder.toString());
     }
 
     @Override

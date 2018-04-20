@@ -16,7 +16,7 @@ public class Path {
     public OrderedPair<BigDecimal> start;
     public OrderedPair<BigDecimal> end;
     public String id;
-    public List<OrderedPair<BigDecimal>> multiPartPath = new ArrayList<>();
+    public final List<OrderedPair<BigDecimal>> multiPartPath = new ArrayList<>();
 
     public Path() {}
 
@@ -76,5 +76,4 @@ public class Path {
 
         return result;
     }
-
 }

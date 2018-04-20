@@ -44,13 +44,9 @@ public class LinearWallModelGenerator {
     }
 
     public LinearWallModel generate() {
-        return createWalls();
-    }
-
-    private LinearWallModel createWalls() {
-        final LinearWallModel linearWallModel = new LinearWallModel(maze.getNumCols(), maze.getNumRows(), favorEwWalls);
-
         final int width = maze.getNumCols(), height = maze.getNumRows(), lastCol = width - 1, lastRow = height - 1;
+        final LinearWallModel linearWallModel = new LinearWallModel(width, height, favorEwWalls);
+
         if (favorEwWalls) {
             // make north walls of the rows
             for (int y = 0; y < height; y++) {

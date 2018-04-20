@@ -11,9 +11,9 @@ import java.util.Map;
  * @author adashrod@gmail.com
  */
 public class VectorNumber {
-    public int number;
-    public BigDecimal width, height;
-    public OrderedPair<BigDecimal> position;
+    public final int number;
+    public final BigDecimal width, height;
+    public final OrderedPair<BigDecimal> position;
     public static final int CHARACTER_WIDTH = 6;
     public static final int CHARACTER_HEIGHT = 10;
 
