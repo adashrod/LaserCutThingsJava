@@ -2,11 +2,18 @@ package com.adashrod.graphgeneration.mazes.algorithms;
 
 import com.adashrod.graphgeneration.common.OrderedPair;
 import com.adashrod.graphgeneration.mazes.Direction;
+import com.adashrod.graphgeneration.mazes.Space;
 import com.adashrod.graphgeneration.mazes.models.Maze;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
+import static com.adashrod.graphgeneration.mazes.Direction.EAST;
+import static com.adashrod.graphgeneration.mazes.Direction.NORTH;
+import static com.adashrod.graphgeneration.mazes.Direction.SOUTH;
+import static com.adashrod.graphgeneration.mazes.Direction.WEST;
 import static com.adashrod.graphgeneration.mazes.Direction.determineDirection;
 
 /**
@@ -17,6 +24,8 @@ import static com.adashrod.graphgeneration.mazes.Direction.determineDirection;
 public class PrimsAlgorithm extends MazeGenerator {
     private Maze maze;
     private final List<OrderedPair<Integer>> nextSpaces = new ArrayList<>();
+    private final Collection<OrderedPair<Integer>> onPath = new HashSet<>();
+    private final Collection<OrderedPair<Integer>> exploringNext = new HashSet<>();
 
     @Override
     public void buildPaths(final Maze maze) {
@@ -36,14 +45,14 @@ public class PrimsAlgorithm extends MazeGenerator {
     }
 
     private void addToNextIfUnexplored(final int x, final int y) {
-        if (maze.isInBounds(x, y) && maze.getGrid()[y][x].isUnexplored()) {
-            maze.getGrid()[y][x].exploringNext = true;
+        if (maze.isInBounds(x, y) && isUnexplored(x, y)) {
+            exploringNext.add(new OrderedPair<>(x, y));
             nextSpaces.add(new OrderedPair<>(x, y));
         }
     }
 
     private void markOnPathAndAddUnexploredNeighborsToNext(final int x, final int y) {
-        maze.getGrid()[y][x].onPath = true;
+        onPath.add(new OrderedPair<>(x, y));
         addToNextIfUnexplored(x - 1, y);
         addToNextIfUnexplored(x + 1, y);
         addToNextIfUnexplored(x,     y - 1);
@@ -52,18 +61,24 @@ public class PrimsAlgorithm extends MazeGenerator {
 
     private List<OrderedPair<Integer>> findOnPathNeighbors(final int x, final int y) {
         final List<OrderedPair<Integer>> n = new ArrayList<>();
-        if (maze.isInBounds(x - 1, y)     && maze.getGrid()[y    ][x - 1].onPath) {
+        if (maze.isInBounds(x - 1, y)     && onPath.contains(new OrderedPair<>(x - 1, y))) {
             n.add(new OrderedPair<>(x - 1, y));
         }
-        if (maze.isInBounds(x + 1, y)     && maze.getGrid()[y    ][x + 1].onPath) {
+        if (maze.isInBounds(x + 1, y)     && onPath.contains(new OrderedPair<>(x + 1, y))) {
             n.add(new OrderedPair<>(x + 1, y));
         }
-        if (maze.isInBounds(x,     y - 1) && maze.getGrid()[y - 1][x    ].onPath) {
+        if (maze.isInBounds(x,     y - 1) && onPath.contains(new OrderedPair<>(x, y - 1))) {
             n.add(new OrderedPair<>(x,     y - 1));
         }
-        if (maze.isInBounds(x,     y + 1) && maze.getGrid()[y + 1][x    ].onPath) {
+        if (maze.isInBounds(x,     y + 1) && onPath.contains(new OrderedPair<>(x, y + 1))) {
             n.add(new OrderedPair<>(x,     y + 1));
         }
         return n;
+    }
+
+    private boolean isUnexplored(final int x, final int y) {
+        final Space space = maze.getGrid()[y][x];
+        return !space.isOpen(NORTH) && !space.isOpen(EAST) && !space.isOpen(SOUTH) && !space.isOpen(WEST) &&
+            !exploringNext.contains(new OrderedPair<>(x, y));
     }
 }

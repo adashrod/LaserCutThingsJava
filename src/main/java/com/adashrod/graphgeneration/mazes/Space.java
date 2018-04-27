@@ -9,12 +9,6 @@ public class Space {
     boolean eastOpen;
     boolean southOpen;
     boolean westOpen;
-    public boolean exploringNext;
-    public boolean onPath;
-
-    public boolean isUnexplored() {
-        return !northOpen && !eastOpen && !southOpen && !westOpen && !exploringNext && !onPath;
-    }
 
     /**
      * Removes a wall in the space
