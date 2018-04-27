@@ -6,6 +6,7 @@ import com.adashrod.graphgeneration.mazes.Space;
 import com.adashrod.graphgeneration.mazes.models.Maze;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +27,8 @@ public class PrimsAlgorithm extends MazeGenerator {
     private final List<OrderedPair<Integer>> nextSpaces = new ArrayList<>();
     private final Collection<OrderedPair<Integer>> onPath = new HashSet<>();
     private final Collection<OrderedPair<Integer>> exploringNext = new HashSet<>();
+    private final List<OrderedPair<Integer>> deltas = Arrays.asList(
+        new OrderedPair<>(0, -1), new OrderedPair<>(1, 0), new OrderedPair<>(0, 1), new OrderedPair<>(-1, 0));
 
     @Override
     public void buildPaths(final Maze maze) {
@@ -53,26 +56,18 @@ public class PrimsAlgorithm extends MazeGenerator {
 
     private void markOnPathAndAddUnexploredNeighborsToNext(final int x, final int y) {
         onPath.add(new OrderedPair<>(x, y));
-        addToNextIfUnexplored(x - 1, y);
-        addToNextIfUnexplored(x + 1, y);
-        addToNextIfUnexplored(x,     y - 1);
-        addToNextIfUnexplored(x,     y + 1);
+        deltas.forEach((final OrderedPair<Integer> delta) -> {
+            addToNextIfUnexplored(x + delta.x, y + delta.y);
+        });
     }
 
     private List<OrderedPair<Integer>> findOnPathNeighbors(final int x, final int y) {
         final List<OrderedPair<Integer>> n = new ArrayList<>();
-        if (maze.isInBounds(x - 1, y)     && onPath.contains(new OrderedPair<>(x - 1, y))) {
-            n.add(new OrderedPair<>(x - 1, y));
-        }
-        if (maze.isInBounds(x + 1, y)     && onPath.contains(new OrderedPair<>(x + 1, y))) {
-            n.add(new OrderedPair<>(x + 1, y));
-        }
-        if (maze.isInBounds(x,     y - 1) && onPath.contains(new OrderedPair<>(x, y - 1))) {
-            n.add(new OrderedPair<>(x,     y - 1));
-        }
-        if (maze.isInBounds(x,     y + 1) && onPath.contains(new OrderedPair<>(x, y + 1))) {
-            n.add(new OrderedPair<>(x,     y + 1));
-        }
+        deltas.forEach((final OrderedPair<Integer> delta) -> {
+            if (maze.isInBounds(x + delta.x, y + delta.y) && onPath.contains(new OrderedPair<>(x + delta.x, y + delta.y))) {
+                n.add(new OrderedPair<>(x + delta.x, y + delta.y));
+            }
+        });
         return n;
     }
 
