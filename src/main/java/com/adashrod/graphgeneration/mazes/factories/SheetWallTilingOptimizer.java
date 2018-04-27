@@ -22,17 +22,21 @@ import static java.math.BigDecimal.ZERO;
  */
 class SheetWallTilingOptimizer {
     private final SheetWallModel sheetWallModel;
-    private final BigDecimal separationSpace, maxWidth, maxHeight;
+    private final BigDecimal separationSpace;
+    private final BigDecimal maxWidth;
+    private final BigDecimal maxHeight;
+    private final BigDecimal wallHeight;
     private OrderedPair<BigDecimal> cursor = new OrderedPair<>(ZERO, ZERO);
     private BigDecimal beginningOfLineX;
     private BigDecimal currentMaxRowWidth;
 
     SheetWallTilingOptimizer(final SheetWallModel sheetWallModel, final BigDecimal separationSpace,
-            final BigDecimal maxWidth, final BigDecimal maxHeight) {
+            final BigDecimal maxWidth, final BigDecimal maxHeight, final BigDecimal wallHeight) {
         this.sheetWallModel = sheetWallModel;
         this.separationSpace = separationSpace;
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
+        this.wallHeight = wallHeight;
     }
 
     // todo: could make this even more efficient by doing rows instead of columns after the first column
@@ -85,7 +89,7 @@ class SheetWallTilingOptimizer {
         final BigDecimal half = new BigDecimal(".5");
         wallLabel.translate(new OrderedPair<>(
             cursor.x.add(wall.findWidth().multiply(half)).subtract(wallLabel.width.multiply(half)),
-            cursor.y.add(wall.findHeight().multiply(half)).subtract(wallLabel.height.multiply(half))
+            cursor.y.add(wallHeight.multiply(half)).subtract(wallLabel.height.multiply(half))
         ));
         sheetWallModel.walls.add(wall);
         cursor.x = cursor.x.add(wall.findWidth()).add(separationSpace);

@@ -1,6 +1,5 @@
 package com.adashrod.graphgeneration;
 
-import com.adashrod.graphgeneration.common.Unit;
 import com.adashrod.graphgeneration.cuttingboardgrids.CuttingBoard;
 import com.adashrod.graphgeneration.mazes.MazePrinter;
 import com.adashrod.graphgeneration.mazes.algorithms.PrimsAlgorithm;
@@ -16,6 +15,7 @@ import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+import static com.adashrod.graphgeneration.common.Unit.INCHES;
 import static com.adashrod.graphgeneration.mazes.Direction.WEST;
 
 /**
@@ -69,19 +69,19 @@ public final class Main {
         new MazePrinter(linearWallModel).printTestSvg("actualTestMaze.svg");
         rectangularWallModel = new RectangularWallModelGenerator(linearWallModel).generate();
         sheetWallModel = new SheetWallModelGenerator(rectangularWallModel, SheetWallModelGenerator.configure()
-            .withUnit(Unit.INCHES)
+            .withUnit(INCHES)
             .withMaterialThickness(new BigDecimal(".118"))
             .withHallWidth(new BigDecimal(".5"))
             .withSeparationSpace(new BigDecimal(".05"))
-            .withWallHeight(new BigDecimal(".5"))
+            .withWallHeight(new BigDecimal(".15"))
             .withNotchHeight(new BigDecimal(".2"))
             .withMaxWidth(new BigDecimal("19.5"))
             .withMaxHeight(new BigDecimal("11"))
             .build()).generate();
-        new MazePrinter(sheetWallModel).printSvg("actualTestMazeCuts.svg", CalibrationRectangle.configure()
-            .withWidth(6).withHeight(6).withUnit(Unit.INCHES).withTopAlignment().withLeftAlignment()
-            .withMaxWidth(new BigDecimal("19.5"))
-            .withMaxHeight(new BigDecimal("11"))
+        // todo: add a unit param to MP ctor?
+        new MazePrinter(sheetWallModel, new BigDecimal("19.5").multiply(INCHES.getPixelsPer()), new BigDecimal("11").multiply(INCHES.getPixelsPer())).printSvg("actualTestMazeCuts.svg",
+            CalibrationRectangle.configure()
+            .withWidth(6).withHeight(6).withUnit(INCHES).withBottomAlignment().withRightAlignment()
             .build());
     }
 }

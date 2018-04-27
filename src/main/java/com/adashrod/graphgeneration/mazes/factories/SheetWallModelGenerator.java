@@ -94,7 +94,7 @@ public class SheetWallModelGenerator {
                 new OrderedPair<>(ZERO, ZERO))); // translate in optimizer
         }
         createOutline(sheetWallModel);
-        new SheetWallTilingOptimizer(sheetWallModel, separationSpace, maxWidth, maxHeight).optimize();
+        new SheetWallTilingOptimizer(sheetWallModel, separationSpace, maxWidth, maxHeight, wallHeight).optimize();
         return sheetWallModel;
     }
 

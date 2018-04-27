@@ -2,10 +2,6 @@ package com.adashrod.graphgeneration.mazes.models;
 
 import com.adashrod.graphgeneration.common.Unit;
 
-import java.math.BigDecimal;
-
-import static java.math.BigDecimal.ZERO;
-
 /**
  * A model for a single rectangle with integral width and height values in inches or cm. This can be printed on an SVG
  * to help calibrate the scale of the SVG on printing software.
@@ -17,18 +13,14 @@ public class CalibrationRectangle {
     private final Unit unit;
     private final boolean isLeftAligned;
     private final boolean isTopAligned;
-    private final BigDecimal maxWidth;
-    private final BigDecimal maxHeight;
 
-    CalibrationRectangle(final int width, final int height, final Unit unit,
-            final boolean isLeftAligned, final boolean isTopAligned, final BigDecimal maxWidth, final BigDecimal maxHeight) {
+    CalibrationRectangle(final int width, final int height, final Unit unit, final boolean isLeftAligned,
+            final boolean isTopAligned) {
         this.width = width;
         this.height = height;
         this.unit = unit;
         this.isLeftAligned = isLeftAligned;
         this.isTopAligned = isTopAligned;
-        this.maxWidth = maxWidth.multiply(unit.getPixelsPer());
-        this.maxHeight = maxHeight.multiply(unit.getPixelsPer());
     }
 
     public int getWidth() {
@@ -51,14 +43,6 @@ public class CalibrationRectangle {
         return isTopAligned;
     }
 
-    public BigDecimal getMaxWidth() {
-        return maxWidth;
-    }
-
-    public BigDecimal getMaxHeight() {
-        return maxHeight;
-    }
-
     public static Builder configure() {
         return new Builder();
     }
@@ -69,8 +53,6 @@ public class CalibrationRectangle {
         private Unit unit;
         private boolean isLeftAligned;
         private boolean isTopAligned;
-        private BigDecimal maxWidth;
-        private BigDecimal maxHeight;
 
         public Builder withWidth(final int width) {
             this.width = width;
@@ -107,16 +89,6 @@ public class CalibrationRectangle {
             return this;
         }
 
-        public Builder withMaxWidth(final BigDecimal maxWidth) {
-            this.maxWidth = maxWidth;
-            return this;
-        }
-
-        public Builder withMaxHeight(final BigDecimal maxHeight) {
-            this.maxHeight = maxHeight;
-            return this;
-        }
-
         public CalibrationRectangle build() {
             final StringBuilder errors = new StringBuilder();
             if (unit != Unit.CENTIMETERS && unit != Unit.INCHES) {
@@ -128,17 +100,11 @@ public class CalibrationRectangle {
             if (height <= 0) {
                 errors.append("height must be positive; ");
             }
-            if (maxWidth.compareTo(ZERO) <= 0) {
-                errors.append("maxWidth must be positive; ");
-            }
-            if (maxHeight.compareTo(ZERO) <= 0) {
-                errors.append("maxHeight must be positive; ");
-            }
             if (errors.length() > 0) {
                 errors.delete(errors.length() - 2, errors.length());
                 throw new IllegalArgumentException(errors.toString());
             }
-            return new CalibrationRectangle(width, height, unit, isLeftAligned, isTopAligned, maxWidth, maxHeight);
+            return new CalibrationRectangle(width, height, unit, isLeftAligned, isTopAligned);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.adashrod.graphgeneration.mazes;
 
+import com.adashrod.graphgeneration.common.OrderedPair;
 import com.adashrod.graphgeneration.mazes.models.CalibrationRectangle;
 import com.adashrod.graphgeneration.mazes.models.LinearWallModel;
 import com.adashrod.graphgeneration.mazes.models.Maze;
@@ -7,7 +8,6 @@ import com.adashrod.graphgeneration.mazes.models.Shape;
 import com.adashrod.graphgeneration.mazes.models.SheetWallModel;
 import com.adashrod.graphgeneration.mazes.models.VectorNumber;
 import com.adashrod.graphgeneration.svg.Path;
-import com.adashrod.graphgeneration.svg.Rect;
 import com.adashrod.graphgeneration.svg.SvgElementGenerator;
 
 import java.io.BufferedReader;
@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Objects;
 
 import static java.math.BigDecimal.ZERO;
@@ -28,7 +29,9 @@ import static java.math.BigDecimal.ZERO;
 public class MazePrinter {
     private final Maze maze;
     private final LinearWallModel linearWallModel;
-    public final SheetWallModel sheetWallModel;
+    private final SheetWallModel sheetWallModel;
+    private final BigDecimal maxWidth;
+    private final BigDecimal maxHeight;
 
     public int precision = 5;
 
@@ -39,6 +42,8 @@ public class MazePrinter {
         this.maze = maze;
         this.linearWallModel = null;
         this.sheetWallModel = null;
+        maxWidth = null;
+        maxHeight = null;
     }
 
     /**
@@ -48,15 +53,19 @@ public class MazePrinter {
         this.maze = null;
         this.linearWallModel = linearWallModel;
         this.sheetWallModel = null;
+        maxWidth = null;
+        maxHeight = null;
     }
 
     /**
      * @param sheetWallModel the maze to print with this MazePrinter instance
      */
-    public MazePrinter(final SheetWallModel sheetWallModel) {
+    public MazePrinter(final SheetWallModel sheetWallModel, final BigDecimal maxWidth, final BigDecimal maxHeight) {
         this.maze = null;
         this.linearWallModel = null;
         this.sheetWallModel = sheetWallModel;
+        this.maxWidth = maxWidth;
+        this.maxHeight = maxHeight;
     }
 
     /**
@@ -207,12 +216,12 @@ public class MazePrinter {
             final SvgElementGenerator svgElementGenerator = new SvgElementGenerator();
 
             fileWriter.append("<g id=\"floor\">");
-            for (final com.adashrod.graphgeneration.mazes.models.Path notch: sheetWallModel.floorNotches.paths) {
+            for (final com.adashrod.graphgeneration.mazes.models.Path notch : sheetWallModel.floorNotches.paths) {
                 final Path svgPath = svgElementGenerator.modelPathToSvgPath(notch);
                 fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
             }
 
-            for (final com.adashrod.graphgeneration.mazes.models.Path outlinePath: sheetWallModel.floorOutline.paths) {
+            for (final com.adashrod.graphgeneration.mazes.models.Path outlinePath : sheetWallModel.floorOutline.paths) {
                 final Path svgPath = svgElementGenerator.modelPathToSvgPath(outlinePath);
                 svgPath.style = svgPath.style.replace("#000000", "#ff0000");
                 fileWriter.append(svgElementGenerator.pathToSvgText(svgPath, precision));
@@ -241,7 +250,12 @@ public class MazePrinter {
             fileWriter.append("</g>\n");
 
             if (calibrationRectangle != null) {
-                fileWriter.append(svgElementGenerator.rectToSvgText(buildCalibrationRectangle(calibrationRectangle), precision));
+                fileWriter.append("<g id=\"calibration-rectangle\">");
+                for (final Path rectSide : this.buildCalibrationRectangle(calibrationRectangle)) {
+                    rectSide.style = rectSide.style.replace("000000", "00ff00");
+                    fileWriter.append(svgElementGenerator.pathToSvgText(rectSide, this.precision));
+                }
+                fileWriter.append("</g>\n");
             }
 
             fileWriter.append("</svg>\n");
@@ -249,22 +263,23 @@ public class MazePrinter {
         }
     }
 
-    private Rect buildCalibrationRectangle(final CalibrationRectangle calibrationRectangle) {
-        final BigDecimal width, height, x, y;
-        width = calibrationRectangle.getUnit().getPixelsPer().multiply(new BigDecimal(calibrationRectangle.getWidth()));
-        height = calibrationRectangle.getUnit().getPixelsPer().multiply(new BigDecimal(calibrationRectangle.getHeight()));
-        if (calibrationRectangle.isLeftAligned()) {
-            x = ZERO;
-        } else {
-            x = calibrationRectangle.getMaxWidth().subtract(width);
+    private Iterable<Path> buildCalibrationRectangle(final CalibrationRectangle calibrationRectangle) {
+        final BigDecimal width = calibrationRectangle.getUnit().getPixelsPer().multiply(new BigDecimal(calibrationRectangle.getWidth())),
+            height = calibrationRectangle.getUnit().getPixelsPer().multiply(new BigDecimal(calibrationRectangle.getHeight()));
+        final OrderedPair<BigDecimal> topLeft = new OrderedPair<>(ZERO, ZERO);
+        if (!calibrationRectangle.isLeftAligned()) {
+            topLeft.x = maxWidth.subtract(width);
         }
-        if (calibrationRectangle.isTopAligned()) {
-            y = ZERO;
-        } else {
-            y = calibrationRectangle.getMaxHeight().subtract(height);
+        if (!calibrationRectangle.isTopAligned()) {
+            topLeft.y = maxHeight.subtract(height);
         }
-        final Rect rect = new Rect("calibration-rectangle", width, height, x, y);
-        rect.style = rect.style.replace("000000", "00ff00");
-        return rect;
+        final OrderedPair<BigDecimal> topRight = new OrderedPair<>(topLeft.x.add(width), topLeft.y),
+                bottomRight = new OrderedPair<>(topRight.x, topLeft.y.add(height)),
+                bottomLeft = new OrderedPair<>(topLeft.x, bottomRight.y);
+        final Path top = new Path(topLeft, topRight),
+                right = new Path(topRight, bottomRight),
+                bottom = new Path(bottomRight, bottomLeft),
+                left = new Path(bottomLeft, topLeft);
+        return Arrays.asList(top, right, bottom, left);
     }
 }

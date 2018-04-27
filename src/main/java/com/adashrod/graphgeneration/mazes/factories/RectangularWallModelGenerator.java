@@ -29,7 +29,7 @@ public class RectangularWallModelGenerator {
     }
 
     public RectangularWallModel generate() {
-        final RectangularWallModel rectangularWallModel = new RectangularWallModel(isWall.length, isWall[0].length);
+        final RectangularWallModel rectangularWallModel = new RectangularWallModel(isWall[0].length, isWall.length);
 
         final Collection<LinearWallModel.Wall> verticalWalls = new ArrayList<>(), horizontalWalls = new ArrayList<>();
         model.walls.forEach((final LinearWallModel.Wall wall) -> {
