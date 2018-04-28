@@ -249,17 +249,22 @@ public class MazePrinter {
             }
             fileWriter.append("</g>\n");
 
-            if (calibrationRectangle != null) {
-                fileWriter.append("<g id=\"calibration-rectangle\">");
-                for (final Path rectSide : this.buildCalibrationRectangle(calibrationRectangle)) {
-                    rectSide.style = rectSide.style.replace("000000", "00ff00");
-                    fileWriter.append(svgElementGenerator.pathToSvgText(rectSide, this.precision));
-                }
-                fileWriter.append("</g>\n");
-            }
+            addCalibrationRectangle(fileWriter, svgElementGenerator, calibrationRectangle);
 
             fileWriter.append("</svg>\n");
             fileWriter.flush();
+        }
+    }
+
+    private void addCalibrationRectangle(final FileWriter fileWriter, final SvgElementGenerator svgElementGenerator,
+            final CalibrationRectangle calibrationRectangle) throws IOException {
+        if (calibrationRectangle != null) {
+            fileWriter.append("<g id=\"calibration-rectangle\">");
+            for (final Path rectSide : this.buildCalibrationRectangle(calibrationRectangle)) {
+                rectSide.style = rectSide.style.replace("000000", "00ff00");
+                fileWriter.append(svgElementGenerator.pathToSvgText(rectSide, this.precision));
+            }
+            fileWriter.append("</g>\n");
         }
     }
 
