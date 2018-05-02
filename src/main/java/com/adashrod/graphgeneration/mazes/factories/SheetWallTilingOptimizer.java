@@ -60,7 +60,7 @@ class SheetWallTilingOptimizer {
                 // so that we don't overwrite cmrw when it's already been set to the floor width on the first iteration
                 if (currentMaxRowWidth == null) {
                     currentMaxRowWidth = longWall.findWidth();
-                    if (cursor.x.add(currentMaxRowWidth).compareTo(maxWidth) > 0) {
+                    if (cursor.x.compareTo(maxWidth) > 0) {
                         sheetWallModel.outOfBounds = true;
                     }
                 }
