@@ -101,7 +101,7 @@
         <mkdir dir="${target.dir}"/>
         <jar destfile="${target.dir}/${jar.filename}" basedir="${build.dir}">
             <manifest>
-                <attribute name="Main-Class" value="com.adashrod.graphgeneration.Main"/>
+                <attribute name="Main-Class" value="com.adashrod.lasercutthings.Main"/>
                 <attribute name="Class-Path" value="${manifest.classpath}"/>
             </manifest>
         </jar>
