@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="GraphGeneration" basedir="." default="build"
+<project name="LaserCutThings" basedir="." default="build"
          xmlns:ivy="antlib:org.apache.ivy.ant"
          xmlns:cs="antlib:com.puppycrawl.tools.checkstyle.ant">
 
@@ -12,7 +12,7 @@
     <property name="lib.dir"                   value="lib"/>
     <property name="build.dir"                 value="build"/>
     <property name="target.dir"                value="target"/>
-    <property name="jar.filename"              value="GraphGeneration.jar"/>
+    <property name="jar.filename"              value="LaserCutThings.jar"/>
 
     <path id="classpath.main">
         <fileset dir="${lib.dir}/runtime">
@@ -81,22 +81,19 @@
             <fileset dir="${lib.dir}">
                 <include name="*.jar"/>
             </fileset>
-            <fileset dir="${lib.dir}/runtime/jar">
-                <include name="*.jar"/>
-            </fileset>
-            <fileset dir="${lib.dir}/runtime/bundle">
+            <fileset dir="${lib.dir}/runtime">
                 <include name="*.jar"/>
             </fileset>
         </copy>
     </target>
 
     <target name="jar" depends="compile, copy-resources" description="creates a jar file in the target directory">
-        <pathconvert refid="classpath.main" property="manifest.classpath" pathsep=" ">
+        <!-- disabled for now since there aren't any runtime dependencies -->
+        <!--<pathconvert refid="classpath.main" property="manifest.classpath" pathsep=" ">-->
             <!--  before mapping, they will all be absolute paths -->
-            <map from="${basedir}/lib/runtime/bundle/" to=""/>
-            <map from="${basedir}/lib/runtime/jar/" to=""/>
-            <map from="${basedir}/lib/" to=""/>
-        </pathconvert>
+            <!--<map from="${basedir}/lib/runtime/" to=""/>-->
+            <!--<map from="${basedir}/lib/" to=""/>-->
+        <!--</pathconvert>-->
 
         <mkdir dir="${target.dir}"/>
         <jar destfile="${target.dir}/${jar.filename}" basedir="${build.dir}">
